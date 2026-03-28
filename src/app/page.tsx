@@ -1,0 +1,5 @@
+import { Step1Analyze } from "./components/step1-analyze";
+
+export default function HomePage() {
+  return <Step1Analyze />;
+}
