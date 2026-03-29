@@ -25,12 +25,19 @@ export type RouteRecommendRequest = {
   targetKcal: number;
   weightKg: number;
   paceMinPerKm: number;
+  targetDurationMin?: number;
 };
 
 export type HistoryEntry = {
   id: string;
   createdAt: string;
   analysis: FoodAnalysisResponse & { kcalAvg: number };
+  plan?: {
+    mode: "walk" | "brisk" | "run";
+    durationMin: number;
+    burnRatioPercent: number;
+    targetBurnKcal: number;
+  };
   profile: {
     weightKg: number;
     paceMinPerKm: number;

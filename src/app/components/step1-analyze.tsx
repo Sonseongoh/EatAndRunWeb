@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { analyzeFoodImage } from "@/lib/api";
@@ -51,7 +52,15 @@ export function Step1Analyze() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-10 md:px-8">
       <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">1단계: 음식 분석</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">1단계: 음식 분석</h1>
+          <Link
+            href="/history"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+          >
+            기록 보기
+          </Link>
+        </div>
         <p className="mt-2 text-sm text-slate-600">
           음식 사진을 업로드하고 분석하기를 누르면 칼로리가 계산됩니다.
         </p>

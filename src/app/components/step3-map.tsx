@@ -9,6 +9,7 @@ import { getActivityLabel } from "@/lib/activity";
 import { recommendRunningRoutes } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
 import { useFlowStore } from "@/store/use-flow-store";
+import { useHistoryStore } from "@/store/use-history-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
 
 const DynamicGoogleRouteMap = dynamic(
@@ -18,8 +19,16 @@ const DynamicGoogleRouteMap = dynamic(
 
 export function Step3Map() {
   const router = useRouter();
-  const { analysis, mode, durationMin, routes, selectedRouteIndex, setSelectedRouteIndex, setRoutes } =
-    useFlowStore();
+  const {
+    analysis,
+    mode,
+    durationMin,
+    routes,
+    selectedRouteIndex,
+    setSelectedRouteIndex,
+    setRoutes
+  } = useFlowStore();
+  const { addEntry } = useHistoryStore();
   const { setStart, burnRatioPercent, startLat, startLng, weightKg, paceMinPerKm } =
     useRunProfileStore();
 
@@ -43,15 +52,42 @@ export function Step3Map() {
       {
         startLat,
         startLng,
-        targetKcal: Math.max(1, Math.round((calcAverageKcal(analysis.kcalMin, analysis.kcalMax) * burnRatioPercent) / 100)),
+        targetKcal: Math.max(
+          1,
+          Math.round(
+            (calcAverageKcal(analysis.kcalMin, analysis.kcalMax) * burnRatioPercent) / 100
+          )
+        ),
         weightKg,
-        paceMinPerKm
+        paceMinPerKm,
+        targetDurationMin: durationMin
       },
       {
-        onSuccess: (nextRoutes) => setRoutes(nextRoutes)
+        onSuccess: (nextRoutes) => {
+          setRoutes(nextRoutes);
+          addEntry({
+            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            createdAt: new Date().toISOString(),
+            analysis,
+            plan: {
+              mode,
+              durationMin,
+              burnRatioPercent,
+              targetBurnKcal
+            },
+            profile: {
+              weightKg,
+              paceMinPerKm,
+              startLat,
+              startLng
+            },
+            routes: nextRoutes
+          });
+        }
       }
     );
   }, [
+    addEntry,
     analysis,
     burnRatioPercent,
     durationMin,
@@ -62,6 +98,7 @@ export function Step3Map() {
     setRoutes,
     startLat,
     startLng,
+    targetBurnKcal,
     weightKg
   ]);
 
@@ -86,7 +123,15 @@ export function Step3Map() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 px-4 py-10 md:px-8">
       <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">3단계: 지도 확인</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">3단계: 지도 확인</h1>
+          <Link
+            href="/history"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+          >
+            기록 보기
+          </Link>
+        </div>
         <p className="mt-2 text-sm text-slate-600">현재 위치와 추천 경로를 지도에서 확인하세요.</p>
       </section>
 
@@ -114,22 +159,28 @@ export function Step3Map() {
         ) : (
           <>
             <div className="grid gap-2 md:grid-cols-3">
-              {routes.map((route, index) => (
-                <button
-                  key={route.id}
-                  type="button"
-                  onClick={() => setSelectedRouteIndex(index)}
-                  className={`rounded-lg border px-3 py-2 text-left text-xs ${
-                    selectedRouteIndex === index
-                      ? "border-mint-500 bg-mint-500 text-white"
-                      : "border-slate-300 bg-white text-slate-700"
-                  }`}
-                >
-                  <p className="font-semibold">{route.name}</p>
-                  <p>거리 {route.distanceKm}km</p>
-                  <p>예상 {route.estimatedMinutes}분</p>
-                </button>
-              ))}
+              {routes.map((route, index) => {
+                const burnPerKm = route.expectedBurnKcal / Math.max(route.distanceKm, 0.1);
+                return (
+                  <button
+                    key={route.id}
+                    type="button"
+                    onClick={() => setSelectedRouteIndex(index)}
+                    className={`rounded-lg border px-3 py-2 text-left text-xs ${
+                      selectedRouteIndex === index
+                        ? "border-mint-500 bg-mint-500 text-white"
+                        : "border-slate-300 bg-white text-slate-700"
+                    }`}
+                  >
+                    <p className="font-semibold">{route.name}</p>
+                    <p>거리 {route.distanceKm}km</p>
+                    <p>예상 {route.estimatedMinutes}분</p>
+                    <p>
+                      소모 {route.expectedBurnKcal}kcal ({burnPerKm.toFixed(1)} kcal/km)
+                    </p>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="h-[420px] overflow-hidden rounded-xl border border-slate-300">
