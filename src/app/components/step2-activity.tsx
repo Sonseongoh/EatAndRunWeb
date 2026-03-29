@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,11 +52,11 @@ export function Step2Activity() {
   if (!analysis) return null;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-10 md:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 py-10 md:px-8">
       <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">2단계: 운동 방식 선택</h1>
         <p className="mt-2 text-sm text-slate-600">
-          걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간이 계산됩니다.
+          걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을 계산합니다.
         </p>
       </section>
 
@@ -98,7 +98,7 @@ export function Step2Activity() {
           </div>
         </div>
 
-        <label className="block text-sm font-medium text-slate-700">몸무게 (kg)</label>
+        <label className="block text-sm font-medium text-slate-700">몸무게(kg)</label>
         <input
           type="number"
           min={35}
@@ -128,12 +128,12 @@ export function Step2Activity() {
         <div className="rounded-lg bg-mint-50 p-4 text-sm text-slate-700">
           <p className="font-semibold text-slate-900">계산 결과</p>
           <p className="mt-1">
-            {getActivityLabel(selectedMode)} 기준 약{" "}
+            {getActivityLabel(selectedMode)} 기준{" "}
             <span className="font-bold text-mint-700">{durationMin}분</span> 운동하면 됩니다.
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <Link
             href="/"
             className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"

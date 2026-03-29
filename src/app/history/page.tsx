@@ -1,6 +1,5 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { getActivityLabel } from "@/lib/activity";
 import { useHistoryStore } from "@/store/use-history-store";
@@ -44,29 +43,21 @@ export default function HistoryPage() {
   }, [filtered]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 md:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 px-4 py-10 md:px-8">
       <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">운동 기록</h1>
-          <div className="flex gap-2">
-            <Link
-              href="/"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
-            >
-              홈으로
-            </Link>
-            <button
-              type="button"
-              onClick={clearEntries}
-              disabled={entries.length === 0}
-              className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-600 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300"
-            >
-              전체 삭제
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={clearEntries}
+            disabled={entries.length === 0}
+            className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-600 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300"
+          >
+            전체 삭제
+          </button>
         </div>
         <p className="mt-2 text-sm text-slate-600">
-          날짜별로 기록을 확인하고, 음식명/코스명 검색과 운동 방식 필터를 적용할 수 있습니다.
+          날짜별로 기록을 확인하고, 음식명과 코스명 검색 및 운동 방식 필터를 적용할 수 있습니다.
         </p>
       </section>
 
@@ -115,7 +106,8 @@ export default function HistoryPage() {
                         {new Date(entry.createdAt).toLocaleTimeString()}
                       </p>
                       <p>
-                        목표: {entry.plan?.targetBurnKcal ?? "-"} kcal ({entry.plan?.burnRatioPercent ?? "-"}%)
+                        목표: {entry.plan?.targetBurnKcal ?? "-"} kcal (
+                        {entry.plan?.burnRatioPercent ?? "-"}%)
                       </p>
                       <p>
                         방식:{" "}

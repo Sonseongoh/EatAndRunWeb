@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
+import { TopNav } from "./components/top-nav";
 
 export const metadata: Metadata = {
   title: "먹고 달리기",
@@ -23,7 +24,10 @@ export default function RootLayout({
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
           />
         ) : null}
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <TopNav />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMutation } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -121,18 +121,12 @@ export function Step3Map() {
   const path = selectedRoute?.path || [];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 px-4 py-10 md:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 py-10 md:px-8">
       <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">3단계: 지도 확인</h1>
-          <Link
-            href="/history"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
-          >
-            기록 보기
-          </Link>
-        </div>
-        <p className="mt-2 text-sm text-slate-600">현재 위치와 추천 경로를 지도에서 확인하세요.</p>
+        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">3단계: 지도 확인</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          현재 위치와 추천 경로를 지도에서 확인하세요.
+        </p>
       </section>
 
       <section className="space-y-4 rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
@@ -158,7 +152,7 @@ export function Step3Map() {
           </div>
         ) : (
           <>
-            <div className="grid gap-2 md:grid-cols-3">
+            <div className="grid gap-2 md:grid-cols-2">
               {routes.map((route, index) => {
                 const burnPerKm = route.expectedBurnKcal / Math.max(route.distanceKm, 0.1);
                 return (
@@ -189,7 +183,7 @@ export function Step3Map() {
           </>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <Link
             href="/activity"
             className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
