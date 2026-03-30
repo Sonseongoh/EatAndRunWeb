@@ -1,15 +1,14 @@
 ﻿"use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getActivityLabel } from "@/lib/activity";
-import { recommendRunningRoutes } from "@/lib/api";
+import { recommendRunningRoutes, saveHistoryEntry } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
 import { useFlowStore } from "@/store/use-flow-store";
-import { useHistoryStore } from "@/store/use-history-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
 
 const DynamicGoogleRouteMap = dynamic(
@@ -19,6 +18,7 @@ const DynamicGoogleRouteMap = dynamic(
 
 export function Step3Map() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     analysis,
     mode,
@@ -28,12 +28,27 @@ export function Step3Map() {
     setSelectedRouteIndex,
     setRoutes
   } = useFlowStore();
-  const { addEntry } = useHistoryStore();
   const { setStart, burnRatioPercent, startLat, startLng, weightKg, paceMinPerKm } =
     useRunProfileStore();
+  const [saveError, setSaveError] = useState("");
+  const savedKeyRef = useRef<string>("");
 
   const routeMutation = useMutation({
     mutationFn: recommendRunningRoutes
+  });
+  const saveMutation = useMutation({
+    mutationFn: saveHistoryEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+    },
+    onError: (error: unknown) => {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "기록 저장에 실패했습니다. 잠시 후 다시 시도해주세요."
+      );
+      savedKeyRef.current = "";
+    }
   });
 
   const targetBurnKcal = analysis
@@ -65,7 +80,8 @@ export function Step3Map() {
       {
         onSuccess: (nextRoutes) => {
           setRoutes(nextRoutes);
-          addEntry({
+          setSaveError("");
+          const entry = {
             id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
             createdAt: new Date().toISOString(),
             analysis,
@@ -82,18 +98,24 @@ export function Step3Map() {
               startLng
             },
             routes: nextRoutes
-          });
+          };
+
+          const saveKey = `${entry.createdAt}-${entry.analysis.foodName}-${entry.plan.mode}`;
+          if (savedKeyRef.current === saveKey) return;
+          savedKeyRef.current = saveKey;
+
+          saveMutation.mutate(entry);
         }
       }
     );
   }, [
-    addEntry,
     analysis,
     burnRatioPercent,
     durationMin,
     mode,
     paceMinPerKm,
     routeMutation,
+    saveMutation,
     routes.length,
     setRoutes,
     startLat,
@@ -138,6 +160,7 @@ export function Step3Map() {
             권장 시간: <span className="font-bold text-mint-700">{durationMin}분</span>
           </p>
         </div>
+        {saveError && <p className="text-sm text-red-600">{saveError}</p>}
 
         {routeMutation.isPending && routes.length === 0 && (
           <p className="text-sm text-slate-500">경로를 불러오는 중입니다...</p>

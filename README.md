@@ -26,9 +26,14 @@ ANALYZE_API_URL=http://localhost:4000/v1/food/analyze
 BACKEND_API_KEY=
 GOOGLE_MAPS_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 If you set `BACKEND_API_KEY` in backend `.env`, set the same value in `.env.local`.
+
+Supabase schema:
+- `supabase/schema.sql`를 Supabase SQL Editor에서 실행하세요.
 
 ## 3) Run
 
@@ -52,4 +57,4 @@ npm run dev
 ## Features
 - AI food calorie analysis from photo upload
 - Road-based route recommendation via Google Directions (OSRM fallback)
-- History persisted with Zustand
+- History persisted with Supabase (server-side pagination/infinite scroll)
