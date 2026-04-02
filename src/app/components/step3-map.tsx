@@ -143,34 +143,34 @@ export function Step3Map() {
   const path = selectedRoute?.path || [];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 py-10 md:px-8">
-      <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">3단계: 지도 확인</h1>
-        <p className="mt-2 text-sm text-slate-600">
+    <main className="app-shell md:px-8">
+      <section className="glass-card">
+        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">3단계: 지도 확인</h1>
+        <p className="mt-2 text-sm text-zinc-300">
           현재 위치와 추천 경로를 지도에서 확인하세요.
         </p>
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <div className="rounded-lg bg-mint-50 p-4 text-sm text-slate-700">
+      <section className="glass-card space-y-4">
+        <div className="glass-soft p-4 text-sm text-zinc-200">
           <p>목표 칼로리: {targetBurnKcal} kcal</p>
           <p>설정 비율: {burnRatioPercent}%</p>
           <p>선택한 방식: {getActivityLabel(mode)}</p>
           <p>
-            권장 시간: <span className="font-bold text-mint-700">{durationMin}분</span>
+            권장 시간: <span className="font-bold text-emerald-300">{durationMin}분</span>
           </p>
         </div>
-        {saveError && <p className="text-sm text-red-600">{saveError}</p>}
+        {saveError && <p className="text-sm text-red-300">{saveError}</p>}
 
         {routeMutation.isPending && routes.length === 0 && (
-          <p className="text-sm text-slate-500">경로를 불러오는 중입니다...</p>
+          <p className="text-sm text-zinc-400">경로를 불러오는 중입니다...</p>
         )}
         {routeMutation.isError && routes.length === 0 && (
-          <p className="text-sm text-red-600">{(routeMutation.error as Error).message}</p>
+          <p className="text-sm text-red-300">{(routeMutation.error as Error).message}</p>
         )}
 
         {!routes.length ? (
-          <div className="h-[420px] overflow-hidden rounded-xl border border-slate-300">
+          <div className="h-[420px] overflow-hidden rounded-xl border border-white/20 bg-zinc-900/60">
             <DynamicGoogleRouteMap center={center} path={[]} />
           </div>
         ) : (
@@ -185,8 +185,8 @@ export function Step3Map() {
                     onClick={() => setSelectedRouteIndex(index)}
                     className={`rounded-lg border px-3 py-2 text-left text-xs ${
                       selectedRouteIndex === index
-                        ? "border-mint-500 bg-mint-500 text-white"
-                        : "border-slate-300 bg-white text-slate-700"
+                        ? "border-emerald-300 bg-emerald-300 text-zinc-900"
+                        : "border-white/20 bg-zinc-900/60 text-zinc-200"
                     }`}
                   >
                     <p className="font-semibold">{route.name}</p>
@@ -200,7 +200,7 @@ export function Step3Map() {
               })}
             </div>
 
-            <div className="h-[420px] overflow-hidden rounded-xl border border-slate-300">
+            <div className="h-[420px] overflow-hidden rounded-xl border border-white/20 bg-zinc-900/60">
               <DynamicGoogleRouteMap center={center} path={path} />
             </div>
           </>
@@ -209,14 +209,14 @@ export function Step3Map() {
         <div className="flex flex-wrap justify-center gap-2">
           <Link
             href="/activity"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+            className="btn-ghost px-3 py-2 text-xs font-semibold"
           >
             이전 화면
           </Link>
           <button
             type="button"
             onClick={onGetCurrentLocation}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+            className="btn-ghost px-3 py-2 text-xs font-semibold"
           >
             현재 위치 다시 가져오기
           </button>
@@ -225,7 +225,7 @@ export function Step3Map() {
               href={selectedRoute.mapUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg bg-mint-500 px-3 py-2 text-xs font-semibold text-white"
+              className="btn-primary px-3 py-2 text-xs"
             >
               외부 지도 열기
             </a>

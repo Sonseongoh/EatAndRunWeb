@@ -1,5 +1,5 @@
-import { Step1Analyze } from "./components/step1-analyze";
+import { LandingPage } from "./components/landing-page";
 
 export default function HomePage() {
-  return <Step1Analyze />;
+  return <LandingPage />;
 }

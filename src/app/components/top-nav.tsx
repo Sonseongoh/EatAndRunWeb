@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const menus = [
   { href: "/", label: "홈" },
+  { href: "/analyze", label: "시작하기" },
   { href: "/history", label: "기록" },
 ];
 
@@ -12,9 +13,9 @@ export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur">
-      <nav className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4 md:px-8">
-        <p className="text-sm font-bold text-slate-900">Eat & Run</p>
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
+      <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <p className="text-sm font-bold tracking-tight text-white">Eat & Run</p>
         <div className="flex items-center gap-2">
           {menus.map((menu) => {
             const active = pathname === menu.href;
@@ -24,8 +25,8 @@ export function TopNav() {
                 href={menu.href}
                 className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
                   active
-                    ? "bg-mint-500 text-white"
-                    : "text-slate-700 hover:bg-slate-100"
+                    ? "bg-emerald-400 text-zinc-950"
+                    : "text-zinc-200 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {menu.label}

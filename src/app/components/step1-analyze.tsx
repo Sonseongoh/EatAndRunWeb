@@ -50,17 +50,17 @@ export function Step1Analyze() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 py-10 md:px-8">
-      <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+    <main className="app-shell md:px-8">
+      <section className="glass-card">
+        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
           1단계: 음식 분석
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-zinc-300">
           음식 사진을 업로드하고 분석하기를 누르면 칼로리가 계산됩니다.
         </p>
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
+      <section className="glass-card space-y-4">
         <input
           ref={fileInputRef}
           type="file"
@@ -70,14 +70,14 @@ export function Step1Analyze() {
         />
 
         {preview ? (
-          <div className="relative w-full overflow-hidden rounded-xl bg-slate-100 p-2">
+          <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 p-2">
             {previewLoading && !previewError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-sm text-slate-500">
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-sm text-zinc-400">
                 이미지 불러오는 중...
               </div>
             )}
             {previewError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-red-50 text-sm text-red-600">
+              <div className="absolute inset-0 flex items-center justify-center bg-red-900/20 text-sm text-red-300">
                 이미지 미리보기를 불러오지 못했습니다.
               </div>
             )}
@@ -86,7 +86,7 @@ export function Step1Analyze() {
               <img
                 src={preview}
                 alt="선택한 음식"
-                className="block h-full w-full object-cover bg-slate-100"
+                className="block h-full w-full object-cover bg-zinc-900"
                 loading="eager"
                 decoding="sync"
                 onLoad={() => setPreviewLoading(false)}
@@ -99,7 +99,7 @@ export function Step1Analyze() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-white"
+              className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
             >
               사진 변경
             </button>
@@ -111,9 +111,9 @@ export function Step1Analyze() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="group flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 text-sm text-slate-500 transition hover:border-mint-500 hover:bg-mint-50"
+            className="group flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/25 text-sm text-zinc-400 transition hover:border-emerald-300 hover:bg-emerald-300/10"
           >
-            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition group-hover:border-mint-500 group-hover:text-mint-700">
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-zinc-200 transition group-hover:border-emerald-300 group-hover:text-emerald-200">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -129,8 +129,8 @@ export function Step1Analyze() {
                 />
               </svg>
             </div>
-            <p className="font-semibold text-slate-700">사진 선택하기</p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="font-semibold text-zinc-100">사진 선택하기</p>
+            <p className="mt-1 text-xs text-zinc-400">
               클릭해서 음식 사진을 업로드해주세요
             </p>
           </button>
@@ -140,20 +140,20 @@ export function Step1Analyze() {
           type="button"
           onClick={onAnalyze}
           disabled={!selectedFile || analyzeMutation.isPending}
-          className="mx-auto block rounded-lg bg-mint-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="btn-primary mx-auto block px-4 py-2 text-sm disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
         >
           {analyzeMutation.isPending ? "분석 중..." : "분석하기"}
         </button>
 
         {analyzeMutation.isError && (
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-red-300">
             {(analyzeMutation.error as Error).message}
           </p>
         )}
 
         {analyzeMutation.data && (
-          <div className="rounded-lg bg-mint-50 p-4 text-sm text-slate-700">
-            <p className="font-semibold text-slate-900">분석 결과</p>
+          <div className="glass-soft p-4 text-sm text-zinc-200">
+            <p className="font-semibold text-zinc-100">분석 결과</p>
             <p className="mt-2">음식: {analyzeMutation.data.foodName}</p>
             <p>
               칼로리: {analyzeMutation.data.kcalMin} -{" "}
@@ -170,7 +170,7 @@ export function Step1Analyze() {
             <button
               type="button"
               onClick={() => router.push("/activity")}
-              className="mx-auto mt-3 block rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold"
+              className="btn-ghost mx-auto mt-3 block px-3 py-2 text-xs font-semibold"
             >
               다음 화면으로
             </button>

@@ -1,9 +1,148 @@
+﻿@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #ccfbf1 0%, #f8fafc 55%);
-  color: #0f172a;
+html {
+  scroll-behavior: smooth;
 }
+
+body {
+  min-height: 100dvh;
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-family: "Pretendard", "Outfit", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.noise-layer {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 0.6px, transparent 0.6px);
+  background-size: 3px 3px;
+}
+
+[data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal].reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+[data-reveal].reveal-init.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-item {
+  animation: fadeInUp 0.65s ease-out both;
+  animation-play-state: paused;
+  animation-delay: calc(var(--index, 0) * 90ms);
+}
+
+[data-reveal].is-visible .reveal-item {
+  animation-play-state: running;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal].reveal-init {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+.app-shell {
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 48rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2.5rem 1rem;
+}
+
+.app-shell::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(16, 185, 129, 0.2), transparent 38%),
+    radial-gradient(circle at 82% 22%, rgba(245, 158, 11, 0.14), transparent 44%),
+    #09090b;
+}
+
+.glass-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(24, 24, 27, 0.72);
+  padding: 1.5rem;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.glass-soft {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(39, 39, 42, 0.48);
+  border-radius: 0.75rem;
+}
+
+.glass-input {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(9, 9, 11, 0.64);
+  color: #f4f4f5;
+}
+
+.glass-input::placeholder {
+  color: #a1a1aa;
+}
+
+.btn-primary {
+  border-radius: 0.75rem;
+  background: #34d399;
+  color: #052e1d;
+  font-weight: 700;
+  transition: transform 0.2s ease-out, filter 0.2s ease-out;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.04);
+  transform: scale(1.01);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e4e4e7;
+  transition: all 0.2s ease-out;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+

@@ -183,16 +183,16 @@ export default function HistoryPage() {
   const isEmpty = !isLoading && entries.length === 0;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col gap-6 px-4 py-10 md:px-8">
-      <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
+    <main className="app-shell md:px-8">
+      <section className="glass-card">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">운동 기록</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">운동 기록</h1>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => seedMutation.mutate()}
               disabled={seedMutation.isPending}
-              className="rounded-lg border border-mint-400 px-3 py-2 text-xs font-semibold text-mint-700 hover:bg-mint-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-ghost px-3 py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
             >
               테스트 데이터 채우기
             </button>
@@ -200,31 +200,31 @@ export default function HistoryPage() {
               type="button"
               onClick={() => clearMutation.mutate()}
               disabled={clearMutation.isPending || entries.length === 0}
-              className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-600 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300"
+              className="rounded-lg border border-red-300/60 px-3 py-2 text-xs font-semibold text-red-300 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
             >
               전체 삭제
             </button>
           </div>
         </div>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-zinc-300">
           Supabase에 저장된 기록을 날짜별로 확인하고, 검색/운동 방식/기간 필터를 적용할 수 있습니다.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">검색 및 필터</p>
+      <section className="glass-card">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">검색 및 필터</p>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="음식명 또는 코스명 검색"
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="glass-input rounded-lg px-3 py-2 text-sm"
           />
           <select
             value={modeFilter}
             onChange={(e) => setModeFilter(e.target.value as FilterMode)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="glass-input rounded-lg px-3 py-2 text-sm"
           >
             <option value="all">전체 방식</option>
             <option value="walk">걷기</option>
@@ -233,19 +233,19 @@ export default function HistoryPage() {
           </select>
         </div>
 
-        <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">기간</p>
+        <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-zinc-400">기간</p>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="glass-input rounded-lg px-3 py-2 text-sm"
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="glass-input rounded-lg px-3 py-2 text-sm"
           />
         </div>
         <div className="mt-3 flex justify-end">
@@ -255,7 +255,7 @@ export default function HistoryPage() {
               setStartDate("");
               setEndDate("");
             }}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="btn-ghost px-3 py-1.5 text-xs font-semibold"
           >
             기간 초기화
           </button>
@@ -263,31 +263,43 @@ export default function HistoryPage() {
       </section>
 
       {entries.length > 0 && (
-        <section className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">기록 요약 차트</h2>
+        <section className="glass-card">
+          <h2 className="text-lg font-semibold text-zinc-100">기록 요약 차트</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="mb-3 text-sm font-semibold text-slate-700">일자별 목표 소모 칼로리</p>
+            <div className="glass-soft p-4">
+              <p className="mb-3 text-sm font-semibold text-zinc-200">일자별 목표 소모 칼로리</p>
               <div className="h-56">
                 <Line
                   data={burnLineData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      x: {
+                        ticks: { color: "#a1a1aa" },
+                        grid: { color: "rgba(255,255,255,0.08)" }
+                      },
+                      y: {
+                        ticks: { color: "#a1a1aa" },
+                        grid: { color: "rgba(255,255,255,0.08)" }
+                      }
+                    }
                   }}
                 />
               </div>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <p className="mb-3 text-sm font-semibold text-slate-700">운동 방식 분포</p>
+            <div className="glass-soft p-4">
+              <p className="mb-3 text-sm font-semibold text-zinc-200">운동 방식 분포</p>
               <div className="h-56">
                 <Doughnut
                   data={modeDoughnutData}
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: "bottom" } }
+                    plugins: {
+                      legend: { position: "bottom", labels: { color: "#d4d4d8" } }
+                    }
                   }}
                 />
               </div>
@@ -297,35 +309,35 @@ export default function HistoryPage() {
       )}
 
       {isLoading && (
-        <section className="rounded-2xl border border-white/70 bg-white/80 p-8 text-sm text-slate-500 shadow-sm">
+        <section className="glass-card p-8 text-sm text-zinc-400">
           기록을 불러오는 중입니다...
         </section>
       )}
 
       {isError && (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 shadow-sm">
+        <section className="rounded-2xl border border-red-300/60 bg-red-900/20 p-6 text-sm text-red-300">
           {(error as Error).message}
         </section>
       )}
 
       {isEmpty && (
-        <section className="rounded-2xl border border-white/70 bg-white/80 p-8 text-sm text-slate-500 shadow-sm">
+        <section className="glass-card p-8 text-sm text-zinc-400">
           조건에 맞는 기록이 없습니다.
         </section>
       )}
 
       {grouped.map(([dateKey, items]) => (
-        <section key={dateKey} className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">{dateKey}</h2>
+        <section key={dateKey} className="glass-card">
+          <h2 className="text-lg font-semibold text-zinc-100">{dateKey}</h2>
           <div className="mt-4 space-y-3">
             {items.map((entry) => (
-              <article key={entry.id} className="rounded-xl border border-slate-200 bg-white p-4">
+              <article key={entry.id} className="glass-soft p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 text-sm text-slate-700">
-                    <p className="font-semibold text-slate-900">
+                  <div className="space-y-1 text-sm text-zinc-200">
+                    <p className="font-semibold text-zinc-100">
                       {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
                     </p>
-                    <p className="text-xs text-slate-500">{new Date(entry.createdAt).toLocaleTimeString()}</p>
+                    <p className="text-xs text-zinc-400">{new Date(entry.createdAt).toLocaleTimeString()}</p>
                     <p>
                       목표: {entry.plan?.targetBurnKcal ?? "-"} kcal ({entry.plan?.burnRatioPercent ?? "-"}%)
                     </p>
@@ -340,7 +352,7 @@ export default function HistoryPage() {
                   <button
                     type="button"
                     onClick={() => deleteMutation.mutate(entry.id)}
-                    className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600"
+                    className="rounded-lg border border-red-300/60 px-3 py-1.5 text-xs font-semibold text-red-300"
                   >
                     삭제
                   </button>
@@ -352,7 +364,7 @@ export default function HistoryPage() {
       ))}
 
       {entries.length > 0 && (
-        <div ref={loadMoreRef} className="py-2 text-center text-xs text-slate-500">
+        <div ref={loadMoreRef} className="py-2 text-center text-xs text-zinc-400">
           {hasNextPage
             ? isFetchingNextPage
               ? "기록을 더 불러오는 중입니다..."

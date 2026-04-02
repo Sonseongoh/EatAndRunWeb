@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { GoogleMap, Marker, Polyline, useJsApiLoader } from "@react-google-maps/api";
 
@@ -20,16 +20,16 @@ export function GoogleRouteMap({ center, path }: GoogleRouteMapProps) {
 
   if (!apiKey) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-slate-500">
-        `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`를 설정하면 Google 지도 미리보기가 표시됩니다.
+      <div className="flex h-full items-center justify-center px-6 text-center text-sm text-zinc-400">
+        `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`를 설정하면 Google 지도 미리보기를 사용할 수 있습니다.
       </div>
     );
   }
 
   if (!isLoaded) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-slate-500">
-        지도를 불러오는 중...
+      <div className="flex h-full items-center justify-center text-sm text-zinc-400">
+        지도를 불러오는 중입니다...
       </div>
     );
   }
@@ -46,8 +46,8 @@ export function GoogleRouteMap({ center, path }: GoogleRouteMapProps) {
         <Polyline
           path={path}
           options={{
-            strokeColor: "#0f766e",
-            strokeOpacity: 0.9,
+            strokeColor: "#34d399",
+            strokeOpacity: 0.92,
             strokeWeight: 5
           }}
         />
