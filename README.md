@@ -1,60 +1,66 @@
-# Eat Run Service
+﻿# Eat & Run Service
 
-This project is now fully self-contained in this folder:
-- Frontend: Next.js app (`/src`)
-- Backend: Express API (`/backend`)
+음식 사진 분석부터 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.
 
-## 1) Where to put your OpenAI key
+- 프론트엔드: Next.js (`/src`)
+- 백엔드: Express (`/backend`)
 
-Put your real key in:
-- `C:\Users\user\Desktop\coding\eat-run-service\backend\.env`
+## 주요 기능
+- 사진 업로드 기반 음식/칼로리 분석
+- 목표 소모 칼로리 기반 운동 방식(걷기/빠른걸음/달리기) 및 시간 계산
+- 지도 기반 러닝 경로 추천
+- Supabase 기반 기록 저장 및 조회(무한 스크롤)
+- 공통 `ActionButton` 컴포넌트 기반 버튼 재사용
 
+## 화면 흐름
+1. `1단계 /analyze`: 음식 사진 업로드 및 분석
+2. `2단계 /activity`: 운동 방식/비율/몸무게 설정
+3. `3단계 /map`: 추천 경로 확인 및 외부 지도 열기
+4. `기록 /history`: 누적 기록 조회/필터/삭제
+
+## 환경 변수
+
+### 1) 백엔드 `backend/.env`
 ```env
 OPENAI_API_KEY=YOUR_REAL_OPENAI_KEY
+BACKEND_API_KEY=
+GOOGLE_MAPS_API_KEY=
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-## 2) Required env files
-
-Backend:
-- [backend/.env](C:\Users\user\Desktop\coding\eat-run-service\backend\.env)
-
-Frontend:
-- [.env.local](C:\Users\user\Desktop\coding\eat-run-service\.env.local)
-
+### 2) 프론트 `.env.local`
 ```env
 ANALYZE_API_URL=http://localhost:4000/v1/food/analyze
 BACKEND_API_KEY=
-GOOGLE_MAPS_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-If you set `BACKEND_API_KEY` in backend `.env`, set the same value in `.env.local`.
+- `BACKEND_API_KEY`를 백엔드에서 사용하면 프론트 `.env.local`에도 같은 값을 넣어주세요.
+- Supabase 스키마는 `supabase/schema.sql`을 Supabase SQL Editor에서 실행해 생성합니다.
 
-Supabase schema:
-- `supabase/schema.sql`를 Supabase SQL Editor에서 실행하세요.
+## 실행 방법
 
-## 3) Run
-
-Install packages:
+### 의존성 설치
 ```bash
 cd C:\Users\user\Desktop\coding\eat-run-service
 npm install
 npm --prefix backend install
 ```
 
-Run backend:
+### 백엔드 실행
 ```bash
 npm run backend:start
 ```
 
-Run frontend:
+### 프론트엔드 실행
 ```bash
 npm run dev
 ```
 
-## Features
-- AI food calorie analysis from photo upload
-- Road-based route recommendation via Google Directions (OSRM fallback)
-- History persisted with Supabase (server-side pagination/infinite scroll)
+### 빌드 확인
+```bash
+npm run build
+```
