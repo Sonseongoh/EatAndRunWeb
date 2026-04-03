@@ -43,14 +43,24 @@ export function GoogleRouteMap({ center, path }: GoogleRouteMapProps) {
     >
       <Marker position={center} />
       {path.length > 1 && (
-        <Polyline
-          path={path}
-          options={{
-            strokeColor: "#34d399",
-            strokeOpacity: 0.92,
-            strokeWeight: 5
-          }}
-        />
+        <>
+          <Polyline
+            path={path}
+            options={{
+              strokeColor: "#0f172a",
+              strokeOpacity: 0.85,
+              strokeWeight: 9
+            }}
+          />
+          <Polyline
+            path={path}
+            options={{
+              strokeColor: "#38bdf8",
+              strokeOpacity: 0.98,
+              strokeWeight: 5
+            }}
+          />
+        </>
       )}
     </GoogleMap>
   );

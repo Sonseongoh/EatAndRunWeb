@@ -221,20 +221,15 @@ export function Step3Map() {
           >
             현재 위치 다시 가져오기
           </ActionButton>
-          {selectedRoute?.mapUrl && (
-            <ActionButton
-              href={selectedRoute.mapUrl}
-              external
-              target="_blank"
-              rel="noreferrer"
-              variant="primary"
-              size="xs"
-              icon={<span>↗</span>}
-              iconPosition="right"
-            >
-              외부 지도 열기
-            </ActionButton>
-          )}
+          <ActionButton
+            href="/history"
+            variant="primary"
+            size="xs"
+            icon={<span>→</span>}
+            iconPosition="right"
+          >
+            기록 화면으로
+          </ActionButton>
         </div>
       </section>
     </main>
