@@ -1,12 +1,12 @@
 ﻿"use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { ActionButton } from "@/app/components/action-button";
 import {
   ActivityMode,
   calculateDurationMinutes,
-  getActivityLabel
+  getActivityLabel,
 } from "@/lib/activity";
 import { useFlowStore } from "@/store/use-flow-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
@@ -18,7 +18,9 @@ export function Step2Activity() {
   const { analysis, mode, setActivity, setRoutes } = useFlowStore();
   const { weightKg, setWeightKg, burnRatioPercent, setBurnRatioPercent } =
     useRunProfileStore();
-  const [selectedMode, setSelectedMode] = useState<ActivityMode>(mode || "walk");
+  const [selectedMode, setSelectedMode] = useState<ActivityMode>(
+    mode || "walk",
+  );
 
   useEffect(() => {
     if (!analysis) router.replace("/");
@@ -38,7 +40,7 @@ export function Step2Activity() {
     return calculateDurationMinutes({
       targetKcal: targetBurnKcal,
       weightKg,
-      mode: selectedMode
+      mode: selectedMode,
     });
   }, [analysis, selectedMode, targetBurnKcal, weightKg]);
 
@@ -54,17 +56,21 @@ export function Step2Activity() {
   return (
     <main className="app-shell md:px-8">
       <section className="glass-card">
-        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">2단계: 운동 방식 선택</h1>
+        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
+          2단계: 운동 방식 선택
+        </h1>
         <p className="mt-2 text-sm text-zinc-300">
-          걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을 계산합니다.
+          걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을
+          계산합니다.
         </p>
       </section>
 
-      <section className="glass-card space-y-4">
-        <div className="glass-soft p-4">
+      <section className="glass-card flex min-h-[32rem] flex-col space-y-6 md:min-h-[36rem]">
+        <div className="glass-soft p-6 mt-6">
           <div className="flex items-center justify-between">
             <p className="text-sm text-zinc-200">
-              목표 소모 칼로리: <span className="font-semibold">{targetBurnKcal} kcal</span>
+              목표 소모 칼로리:{" "}
+              <span className="font-semibold">{targetBurnKcal} kcal</span>
             </p>
             <p className="text-xs text-zinc-400">
               (섭취 {analysis.kcalAvg} kcal의 {burnRatioPercent}%)
@@ -98,7 +104,9 @@ export function Step2Activity() {
           </div>
         </div>
 
-        <label className="block text-sm font-medium text-zinc-200">몸무게(kg)</label>
+        <label className="block text-sm font-medium text-zinc-200">
+          몸무게(kg)
+        </label>
         <input
           type="number"
           min={35}
@@ -125,28 +133,32 @@ export function Step2Activity() {
           ))}
         </div>
 
-        <div className="glass-soft p-4 text-sm text-zinc-200">
+        <div className="glass-soft p-6 text-sm text-zinc-200">
           <p className="font-semibold text-zinc-100">계산 결과</p>
           <p className="mt-1">
             {getActivityLabel(selectedMode)} 기준{" "}
-            <span className="font-bold text-emerald-300">{durationMin}분</span> 운동하면 됩니다.
+            <span className="font-bold text-emerald-300">{durationMin}분</span>{" "}
+            운동하면 됩니다.
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2">
-          <Link
-            href="/"
-            className="btn-ghost px-3 py-2 text-xs font-semibold"
+        <div className="mt-auto flex flex-wrap justify-center gap-4 pt-2">
+          <ActionButton
+            href="/analyze"
+            variant="ghost"
+            size="xs"
           >
             이전 화면
-          </Link>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
             onClick={onNext}
-            className="btn-primary px-3 py-2 text-xs"
+            variant="primary"
+            size="xs"
+            icon={<span>→</span>}
+            iconPosition="right"
           >
             지도 화면으로
-          </button>
+          </ActionButton>
         </div>
       </section>
     </main>

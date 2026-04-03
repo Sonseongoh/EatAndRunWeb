@@ -2,9 +2,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ActionButton } from "@/app/components/action-button";
 import { getActivityLabel } from "@/lib/activity";
 import { recommendRunningRoutes, saveHistoryEntry } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
@@ -207,28 +207,33 @@ export function Step3Map() {
         )}
 
         <div className="flex flex-wrap justify-center gap-2">
-          <Link
+          <ActionButton
             href="/activity"
-            className="btn-ghost px-3 py-2 text-xs font-semibold"
+            variant="ghost"
+            size="xs"
           >
             이전 화면
-          </Link>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
             onClick={onGetCurrentLocation}
-            className="btn-ghost px-3 py-2 text-xs font-semibold"
+            variant="ghost"
+            size="xs"
           >
             현재 위치 다시 가져오기
-          </button>
+          </ActionButton>
           {selectedRoute?.mapUrl && (
-            <a
+            <ActionButton
               href={selectedRoute.mapUrl}
+              external
               target="_blank"
               rel="noreferrer"
-              className="btn-primary px-3 py-2 text-xs"
+              variant="primary"
+              size="xs"
+              icon={<span>↗</span>}
+              iconPosition="right"
             >
               외부 지도 열기
-            </a>
+            </ActionButton>
           )}
         </div>
       </section>

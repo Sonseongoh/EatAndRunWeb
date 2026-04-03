@@ -146,3 +146,15 @@ body {
   border-color: rgba(255, 255, 255, 0.28);
 }
 
+.btn-danger {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(252, 165, 165, 0.6);
+  color: #fca5a5;
+  transition: all 0.2s ease-out;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(252, 165, 165, 0.8);
+}
+

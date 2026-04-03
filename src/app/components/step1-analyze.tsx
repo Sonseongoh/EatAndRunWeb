@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ActionButton } from "@/app/components/action-button";
 import { analyzeFoodImage } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
 import { useFlowStore } from "@/store/use-flow-store";
@@ -60,7 +61,7 @@ export function Step1Analyze() {
         </p>
       </section>
 
-      <section className="glass-card space-y-4">
+      <section className="glass-card space-y-6">
         <input
           ref={fileInputRef}
           type="file"
@@ -82,11 +83,11 @@ export function Step1Analyze() {
               </div>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <div className="h-72 overflow-hidden rounded-lg md:h-80">
+            <div className="h-96 overflow-hidden rounded-lg md:h-[28rem]">
               <img
                 src={preview}
                 alt="선택한 음식"
-                className="block h-full w-full object-cover bg-zinc-900"
+                className="block h-full w-full object-fill bg-zinc-900"
                 loading="eager"
                 decoding="sync"
                 onLoad={() => setPreviewLoading(false)}
@@ -99,7 +100,7 @@ export function Step1Analyze() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
+              className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
             >
               사진 변경
             </button>
@@ -111,7 +112,7 @@ export function Step1Analyze() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="group flex h-72 w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/25 text-sm text-zinc-400 transition hover:border-emerald-300 hover:bg-emerald-300/10"
+            className="group flex h-96 w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/25 text-sm text-zinc-400 transition hover:border-emerald-300 hover:bg-emerald-300/10 md:h-[28rem]"
           >
             <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-zinc-200 transition group-hover:border-emerald-300 group-hover:text-emerald-200">
               <svg
@@ -136,14 +137,15 @@ export function Step1Analyze() {
           </button>
         )}
 
-        <button
-          type="button"
+        <ActionButton
           onClick={onAnalyze}
           disabled={!selectedFile || analyzeMutation.isPending}
-          className="btn-primary mx-auto block px-4 py-2 text-sm disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
+          variant="primary"
+          size="sm"
+          className="mx-auto mt-8 block disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
         >
           {analyzeMutation.isPending ? "분석 중..." : "분석하기"}
-        </button>
+        </ActionButton>
 
         {analyzeMutation.isError && (
           <p className="text-sm text-red-300">
@@ -167,13 +169,14 @@ export function Step1Analyze() {
               )}{" "}
               kcal
             </p>
-            <button
-              type="button"
+            <ActionButton
               onClick={() => router.push("/activity")}
-              className="btn-ghost mx-auto mt-3 block px-3 py-2 text-xs font-semibold"
+              variant="ghost"
+              size="xs"
+              className="mx-auto mt-3 block"
             >
               다음 화면으로
-            </button>
+            </ActionButton>
           </div>
         )}
       </section>

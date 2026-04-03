@@ -13,6 +13,7 @@ import {
   Tooltip
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
+import { ActionButton } from "@/app/components/action-button";
 import { getActivityLabel } from "@/lib/activity";
 import {
   clearHistoryEntries,
@@ -188,22 +189,24 @@ export default function HistoryPage() {
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">운동 기록</h1>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <ActionButton
               onClick={() => seedMutation.mutate()}
               disabled={seedMutation.isPending}
-              className="btn-ghost px-3 py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+              variant="ghost"
+              size="xs"
+              className="disabled:cursor-not-allowed disabled:opacity-50"
             >
               테스트 데이터 채우기
-            </button>
-            <button
-              type="button"
+            </ActionButton>
+            <ActionButton
               onClick={() => clearMutation.mutate()}
               disabled={clearMutation.isPending || entries.length === 0}
-              className="rounded-lg border border-red-300/60 px-3 py-2 text-xs font-semibold text-red-300 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
+              variant="danger"
+              size="xs"
+              className="disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
             >
               전체 삭제
-            </button>
+            </ActionButton>
           </div>
         </div>
         <p className="mt-2 text-sm text-zinc-300">
@@ -249,16 +252,17 @@ export default function HistoryPage() {
           />
         </div>
         <div className="mt-3 flex justify-end">
-          <button
-            type="button"
+          <ActionButton
             onClick={() => {
               setStartDate("");
               setEndDate("");
             }}
-            className="btn-ghost px-3 py-1.5 text-xs font-semibold"
+            variant="ghost"
+            size="xs"
+            className="py-1.5"
           >
             기간 초기화
-          </button>
+          </ActionButton>
         </div>
       </section>
 
@@ -349,13 +353,14 @@ export default function HistoryPage() {
                     </p>
                     <p>경로: {entry.routes.map((route) => route.name).join(", ")}</p>
                   </div>
-                  <button
-                    type="button"
+                  <ActionButton
                     onClick={() => deleteMutation.mutate(entry.id)}
-                    className="rounded-lg border border-red-300/60 px-3 py-1.5 text-xs font-semibold text-red-300"
+                    variant="danger"
+                    size="xs"
+                    className="py-1.5"
                   >
                     삭제
-                  </button>
+                  </ActionButton>
                 </div>
               </article>
             ))}
