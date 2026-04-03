@@ -18,7 +18,10 @@ export function TopNav() {
         <p className="text-sm font-bold tracking-tight text-white">Eat & Run</p>
         <div className="flex items-center gap-2">
           {menus.map((menu) => {
-            const active = pathname === menu.href;
+            const active =
+              menu.href === "/analyze"
+                ? ["/analyze", "/activity", "/map"].includes(pathname)
+                : pathname === menu.href;
             return (
               <Link
                 key={menu.href}

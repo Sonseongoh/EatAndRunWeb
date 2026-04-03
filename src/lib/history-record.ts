@@ -2,6 +2,7 @@ import { HistoryEntry, RouteRecommendation } from "@/lib/types";
 
 export type HistoryDbRow = {
   id: string;
+  user_id: string;
   created_at: string;
   food_name: string;
   mode: "walk" | "brisk" | "run" | null;

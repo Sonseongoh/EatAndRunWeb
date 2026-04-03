@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getErrorMessage } from "@/lib/error-message";
 import { fromHistoryDbRow, HistoryDbRow, toHistoryDbRow } from "@/lib/history-record";
+import { applyHistoryUserCookie, resolveHistoryUserId } from "@/lib/history-user";
 import { HistoryEntry } from "@/lib/types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -16,6 +17,7 @@ function toEndOfDayKstIso(date: string) {
 
 export async function GET(request: NextRequest) {
   try {
+    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
     const supabase = createSupabaseServerClient();
     const searchParams = request.nextUrl.searchParams;
     const limit = Math.min(
@@ -31,6 +33,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from(TABLE)
       .select("*")
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -50,7 +53,9 @@ export async function GET(request: NextRequest) {
     const entries = rows.map(fromHistoryDbRow);
     const nextCursor = rows.length === limit ? rows[rows.length - 1]?.created_at ?? null : null;
 
-    return NextResponse.json({ entries, nextCursor });
+    const response = NextResponse.json({ entries, nextCursor });
+    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 조회에 실패했습니다.");
     return NextResponse.json({ error: { message } }, { status: 500 });
@@ -59,6 +64,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
     const supabase = createSupabaseServerClient();
     const body = (await request.json()) as { entry?: HistoryEntry };
     const entry = body.entry;
@@ -68,12 +74,14 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from(TABLE)
-      .insert(toHistoryDbRow(entry))
+      .insert({ ...toHistoryDbRow(entry), user_id: userId })
       .select("*")
       .single();
     if (error) throw error;
 
-    return NextResponse.json({ entry: fromHistoryDbRow(data as HistoryDbRow) });
+    const response = NextResponse.json({ entry: fromHistoryDbRow(data as HistoryDbRow) });
+    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 저장에 실패했습니다.");
     return NextResponse.json({ error: { message } }, { status: 500 });
@@ -82,24 +90,29 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
     const supabase = createSupabaseServerClient();
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get("id");
     const clear = searchParams.get("clear") === "true";
 
     if (clear) {
-      const { error } = await supabase.from(TABLE).delete().not("id", "is", null);
+      const { error } = await supabase.from(TABLE).delete().eq("user_id", userId);
       if (error) throw error;
-      return NextResponse.json({ ok: true });
+      const response = NextResponse.json({ ok: true });
+      applyHistoryUserCookie(response, userId, shouldSetCookie);
+      return response;
     }
 
     if (!id) {
       return NextResponse.json({ error: { message: "id가 필요합니다." } }, { status: 400 });
     }
 
-    const { error } = await supabase.from(TABLE).delete().eq("id", id);
+    const { error } = await supabase.from(TABLE).delete().eq("id", id).eq("user_id", userId);
     if (error) throw error;
-    return NextResponse.json({ ok: true });
+    const response = NextResponse.json({ ok: true });
+    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 삭제에 실패했습니다.");
     return NextResponse.json({ error: { message } }, { status: 500 });

@@ -11,6 +11,7 @@
 - 지도 기반 러닝 경로 추천
 - Supabase 기반 기록 저장 및 조회(무한 스크롤)
 - 공통 `ActionButton` 컴포넌트 기반 버튼 재사용
+- 기기별 익명 사용자 쿠키(`eat_run_uid`) 기반 기록 분리
 
 ## 화면 흐름
 1. `1단계 /analyze`: 음식 사진 업로드 및 분석
@@ -40,6 +41,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 - `BACKEND_API_KEY`를 백엔드에서 사용하면 프론트 `.env.local`에도 같은 값을 넣어주세요.
 - Supabase 스키마는 `supabase/schema.sql`을 Supabase SQL Editor에서 실행해 생성합니다.
+- 기존에 스키마를 이미 적용했다면 `supabase/schema.sql`을 다시 실행해 `history_entries.user_id` 컬럼을 반영해 주세요.
 
 ## 실행 방법
 

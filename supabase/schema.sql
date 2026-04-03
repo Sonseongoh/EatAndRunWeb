@@ -2,6 +2,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.history_entries (
   id uuid primary key default gen_random_uuid(),
+  user_id text not null,
   created_at timestamptz not null default now(),
   food_name text not null,
   mode text null check (mode in ('walk', 'brisk', 'run')),
@@ -17,8 +18,21 @@ create table if not exists public.history_entries (
   routes jsonb not null
 );
 
+alter table public.history_entries
+  add column if not exists user_id text;
+
+update public.history_entries
+set user_id = 'legacy'
+where user_id is null;
+
+alter table public.history_entries
+  alter column user_id set not null;
+
 create index if not exists idx_history_entries_created_at_desc
   on public.history_entries (created_at desc);
+
+create index if not exists idx_history_entries_user_id_created_at_desc
+  on public.history_entries (user_id, created_at desc);
 
 create index if not exists idx_history_entries_mode
   on public.history_entries (mode);
