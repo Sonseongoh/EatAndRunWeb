@@ -66,3 +66,7 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## 배포
+
+- Vercel 배포 체크리스트: `docs/DEPLOY_VERCEL.md`
