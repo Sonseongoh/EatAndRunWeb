@@ -27,6 +27,28 @@ export async function analyzeFoodImage(
   return response.json();
 }
 
+export async function analyzeFoodText(text: string): Promise<FoodAnalysisResponse> {
+  const response = await fetch("/api/v1/food/analyze-text", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      text,
+      locale: "ko-KR"
+    })
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    const message =
+      payload?.error?.message ?? "텍스트 칼로리 분석에 실패했습니다. 다시 시도해주세요.";
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 export async function recommendRunningRoutes(
   request: RouteRecommendRequest
 ): Promise<RouteRecommendation[]> {

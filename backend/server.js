@@ -53,6 +53,48 @@ function estimateFromBuffer(buffer) {
   return mockCandidates[hash % mockCandidates.length];
 }
 
+function estimateFromText(text) {
+  let hash = 0;
+  for (const char of text) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 2147483647;
+  }
+  return mockCandidates[hash % mockCandidates.length];
+}
+
+function parseAnalysisResult(raw) {
+  const parsed = JSON.parse(raw);
+  const foodName = typeof parsed.foodName === "string" ? parsed.foodName : "";
+  const kcalMin = Number(parsed.kcalMin);
+  const kcalMax = Number(parsed.kcalMax);
+  const confidence = Number(parsed.confidence);
+
+  if (!foodName || !Number.isFinite(kcalMin) || !Number.isFinite(kcalMax)) {
+    throw new Error("OpenAI response missing required fields");
+  }
+
+  return {
+    foodName,
+    kcalMin: Math.max(0, Math.round(Math.min(kcalMin, kcalMax))),
+    kcalMax: Math.max(0, Math.round(Math.max(kcalMin, kcalMax))),
+    confidence: Number.isFinite(confidence)
+      ? Math.max(0, Math.min(1, Number(confidence.toFixed(2))))
+      : 0.7
+  };
+}
+
+function validateApiKey(req, res) {
+  if (!backendApiKey) return true;
+  const authHeader = req.headers.authorization || "";
+  const expected = `Bearer ${backendApiKey}`;
+  if (authHeader !== expected) {
+    res.status(401).json({
+      error: { code: "UNAUTHORIZED", message: "invalid or missing API key" }
+    });
+    return false;
+  }
+  return true;
+}
+
 async function estimateWithOpenAI({ buffer, mimeType, locale }) {
   if (!openai) {
     throw new Error("OPENAI_API_KEY is not configured");
@@ -88,25 +130,38 @@ async function estimateWithOpenAI({ buffer, mimeType, locale }) {
   });
 
   const raw = completion.choices?.[0]?.message?.content || "";
-  const parsed = JSON.parse(raw);
+  return {
+    ...parseAnalysisResult(raw),
+    source: "openai"
+  };
+}
 
-  const foodName = typeof parsed.foodName === "string" ? parsed.foodName : "";
-  const kcalMin = Number(parsed.kcalMin);
-  const kcalMax = Number(parsed.kcalMax);
-  const confidence = Number(parsed.confidence);
-
-  if (!foodName || !Number.isFinite(kcalMin) || !Number.isFinite(kcalMax)) {
-    throw new Error("OpenAI response missing required fields");
+async function estimateTextWithOpenAI({ text, locale }) {
+  if (!openai) {
+    throw new Error("OPENAI_API_KEY is not configured");
   }
 
+  const completion = await openai.chat.completions.create({
+    model: openaiModel,
+    response_format: { type: "json_object" },
+    temperature: 0.2,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You analyze user-entered meal descriptions. Return strict JSON with keys: foodName(string), kcalMin(number), kcalMax(number), confidence(number 0-1). kcalMin must be <= kcalMax."
+      },
+      {
+        role: "user",
+        content: `Locale hint: ${locale || "en-US"}. Meal text: ${text}`
+      }
+    ]
+  });
+
+  const raw = completion.choices?.[0]?.message?.content || "";
   return {
-    foodName,
-    kcalMin: Math.max(0, Math.round(Math.min(kcalMin, kcalMax))),
-    kcalMax: Math.max(0, Math.round(Math.max(kcalMin, kcalMax))),
-    confidence: Number.isFinite(confidence)
-      ? Math.max(0, Math.min(1, Number(confidence.toFixed(2))))
-      : 0.7,
-    source: "openai"
+    ...parseAnalysisResult(raw),
+    source: "openai-text"
   };
 }
 
@@ -119,15 +174,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/v1/food/analyze", upload.single("image"), async (req, res) => {
-  if (backendApiKey) {
-    const authHeader = req.headers.authorization || "";
-    const expected = `Bearer ${backendApiKey}`;
-    if (authHeader !== expected) {
-      return res.status(401).json({
-        error: { code: "UNAUTHORIZED", message: "invalid or missing API key" }
-      });
-    }
-  }
+  if (!validateApiKey(req, res)) return;
 
   if (!req.file) {
     return res.status(400).json({
@@ -162,6 +209,38 @@ app.post("/v1/food/analyze", upload.single("image"), async (req, res) => {
     return res.status(200).json({
       ...fallback,
       source: "mock-fallback"
+    });
+  }
+});
+
+app.post("/v1/food/analyze-text", async (req, res) => {
+  if (!validateApiKey(req, res)) return;
+
+  const text = String(req.body?.text || "").trim();
+  const locale = String(req.body?.locale || "ko-KR");
+  if (!text) {
+    return res.status(400).json({
+      error: { code: "INVALID_TEXT", message: "text is required" }
+    });
+  }
+
+  try {
+    const aiResult = await estimateTextWithOpenAI({ text, locale });
+    return res.status(200).json(aiResult);
+  } catch (error) {
+    if (!allowMockFallback) {
+      return res.status(502).json({
+        error: {
+          code: "AI_ANALYSIS_FAILED",
+          message: "failed to analyze text with AI model"
+        }
+      });
+    }
+
+    const fallback = estimateFromText(text);
+    return res.status(200).json({
+      ...fallback,
+      source: "mock-text-fallback"
     });
   }
 });
