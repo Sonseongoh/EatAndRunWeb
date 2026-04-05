@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { HISTORY_USER_COOKIE_NAME } from "@/lib/history-user";
 
 const analyzeApiUrl = process.env.ANALYZE_API_URL;
 const backendApiKey = process.env.BACKEND_API_KEY;
@@ -49,8 +50,12 @@ export async function POST(req: NextRequest) {
   outgoing.append("locale", locale);
 
   const headers: HeadersInit = {};
+  const historyUserId = req.cookies.get(HISTORY_USER_COOKIE_NAME)?.value?.trim();
   if (backendApiKey) {
     headers.Authorization = `Bearer ${backendApiKey}`;
+  }
+  if (historyUserId) {
+    headers["X-User-Id"] = historyUserId;
   }
 
   const upstream = await fetch(analyzeApiUrl, {

@@ -1,8 +1,9 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const dotenv = require("dotenv");
 const OpenAI = require("openai");
+const { createAnalyzeRateLimiters } = require("./rate-limit");
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000")
   .filter(Boolean);
 
 const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
+const rateLimiters = createAnalyzeRateLimiters();
 
 app.use(
   cors({
@@ -92,6 +94,63 @@ function validateApiKey(req, res) {
     });
     return false;
   }
+  return true;
+}
+
+function resolveUserRateLimitKey(req) {
+  const fromHeader = String(req.headers["x-user-id"] || "").trim();
+  if (!fromHeader) return null;
+  return `user:${fromHeader}`;
+}
+
+function resolveIpRateLimitKey(req) {
+  const forwardedFor = String(req.headers["x-forwarded-for"] || "").trim();
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return `ip:${firstIp}`;
+  }
+
+  const fromIp = String(req.ip || "").trim();
+  if (fromIp) return `ip:${fromIp}`;
+
+  return "ip:anonymous";
+}
+
+function applyRateLimitHeaders(res, result) {
+  res.setHeader("X-RateLimit-Limit", String(result.limit));
+  res.setHeader("X-RateLimit-Remaining", String(result.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.ceil(result.resetAt / 1000)));
+}
+
+function validateRateLimit(req, res, limiters) {
+  const userKey = resolveUserRateLimitKey(req);
+  const ipKey = resolveIpRateLimitKey(req);
+
+  const userResult = userKey ? limiters.user.take(userKey) : null;
+  const ipResult = limiters.ip.take(ipKey);
+
+  if (userResult) {
+    res.setHeader("X-RateLimit-User-Limit", String(userResult.limit));
+    res.setHeader("X-RateLimit-User-Remaining", String(userResult.remaining));
+    res.setHeader("X-RateLimit-User-Reset", String(Math.ceil(userResult.resetAt / 1000)));
+  }
+  res.setHeader("X-RateLimit-Ip-Limit", String(ipResult.limit));
+  res.setHeader("X-RateLimit-Ip-Remaining", String(ipResult.remaining));
+  res.setHeader("X-RateLimit-Ip-Reset", String(Math.ceil(ipResult.resetAt / 1000)));
+
+  const blocked = userResult && !userResult.allowed ? userResult : !ipResult.allowed ? ipResult : null;
+  if (blocked) {
+    applyRateLimitHeaders(res, blocked);
+    res.status(429).json({
+      error: {
+        code: "RATE_LIMIT_EXCEEDED",
+        message: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."
+      }
+    });
+    return false;
+  }
+
+  applyRateLimitHeaders(res, userResult ?? ipResult);
   return true;
 }
 
@@ -175,6 +234,7 @@ app.get("/health", (_req, res) => {
 
 app.post("/v1/food/analyze", upload.single("image"), async (req, res) => {
   if (!validateApiKey(req, res)) return;
+  if (!validateRateLimit(req, res, rateLimiters.image)) return;
 
   if (!req.file) {
     return res.status(400).json({
@@ -215,6 +275,7 @@ app.post("/v1/food/analyze", upload.single("image"), async (req, res) => {
 
 app.post("/v1/food/analyze-text", async (req, res) => {
   if (!validateApiKey(req, res)) return;
+  if (!validateRateLimit(req, res, rateLimiters.text)) return;
 
   const text = String(req.body?.text || "").trim();
   const locale = String(req.body?.locale || "ko-KR");
@@ -263,3 +324,4 @@ if (require.main === module) {
 }
 
 module.exports = { app };
+

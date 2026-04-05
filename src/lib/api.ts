@@ -1,13 +1,11 @@
-import {
+﻿import {
   HistoryEntry,
   FoodAnalysisResponse,
   RouteRecommendation,
   RouteRecommendRequest
 } from "./types";
 
-export async function analyzeFoodImage(
-  file: File
-): Promise<FoodAnalysisResponse> {
+export async function analyzeFoodImage(file: File): Promise<FoodAnalysisResponse> {
   const formData = new FormData();
   formData.append("image", file);
   formData.append("locale", "ko-KR");
@@ -19,8 +17,10 @@ export async function analyzeFoodImage(
 
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
-    const message =
-      payload?.error?.message ?? "칼로리 분석에 실패했습니다. 다시 시도해주세요.";
+    if (response.status === 429) {
+      throw new Error("요청이 많아 잠시 제한되었습니다. 1분 뒤 다시 시도해주세요.");
+    }
+    const message = payload?.error?.message ?? "칼로리 분석에 실패했습니다. 다시 시도해주세요.";
     throw new Error(message);
   }
 
@@ -41,8 +41,10 @@ export async function analyzeFoodText(text: string): Promise<FoodAnalysisRespons
 
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
-    const message =
-      payload?.error?.message ?? "텍스트 칼로리 분석에 실패했습니다. 다시 시도해주세요.";
+    if (response.status === 429) {
+      throw new Error("요청이 많아 잠시 제한되었습니다. 1분 뒤 다시 시도해주세요.");
+    }
+    const message = payload?.error?.message ?? "텍스트 칼로리 분석에 실패했습니다. 다시 시도해주세요.";
     throw new Error(message);
   }
 
@@ -64,7 +66,7 @@ export async function recommendRunningRoutes(
     const payload = await response.json().catch(() => null);
     const message =
       payload?.error?.message ??
-      "경로 추천에 실패했습니다. 위치를 확인한 뒤 다시 시도해주세요.";
+      "경로 추천에 실패했습니다. 위치를 확인하고 다시 시도해주세요.";
     throw new Error(message);
   }
 
