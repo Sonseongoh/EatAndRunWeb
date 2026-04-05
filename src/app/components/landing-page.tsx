@@ -31,32 +31,32 @@ const featureCards = [
   }
 ];
 
-const testimonials = [
-  {
-    name: "김서윤",
-    role: "프로덕트 디자이너",
-    company: "스텝랩",
-    quote:
-      "퇴근 후에 뭘 얼마나 뛰어야 할지 항상 막막했는데, Eat & Run은 사진 올리고 바로 실행하면 돼서 루틴이 끊기지 않았습니다.",
-    rating: "4.9/5"
-  },
-  {
-    name: "박도현",
-    role: "백엔드 엔지니어",
-    company: "런브릿지",
-    quote:
-      "식단 기록 앱은 많았지만 운동 루트까지 연결되는 건 처음이었습니다. 실사용 흐름이 짧아서 꾸준히 쓰기 좋습니다.",
-    rating: "4.8/5"
-  },
-  {
-    name: "이서진",
-    role: "대학원생",
-    company: "모션인사이트",
-    quote:
-      "칼로리 숫자만 보여주는 게 아니라, 실제로 오늘 어디를 뛰면 되는지까지 안내해줘서 실행 부담이 많이 줄었습니다.",
-    rating: "4.9/5"
-  }
-];
+// const testimonials = [
+//   {
+//     name: "김서윤",
+//     role: "프로덕트 디자이너",
+//     company: "스텝랩",
+//     quote:
+//       "퇴근 후에 뭘 얼마나 뛰어야 할지 항상 막막했는데, Eat & Run은 사진 올리고 바로 실행하면 돼서 루틴이 끊기지 않았습니다.",
+//     rating: "4.9/5"
+//   },
+//   {
+//     name: "박도현",
+//     role: "백엔드 엔지니어",
+//     company: "런브릿지",
+//     quote:
+//       "식단 기록 앱은 많았지만 운동 루트까지 연결되는 건 처음이었습니다. 실사용 흐름이 짧아서 꾸준히 쓰기 좋습니다.",
+//     rating: "4.8/5"
+//   },
+//   {
+//     name: "이서진",
+//     role: "대학원생",
+//     company: "모션인사이트",
+//     quote:
+//       "칼로리 숫자만 보여주는 게 아니라, 실제로 오늘 어디를 뛰면 되는지까지 안내해줘서 실행 부담이 많이 줄었습니다.",
+//     rating: "4.9/5"
+//   }
+// ];
 
 export function LandingPage() {
   useEffect(() => {
@@ -190,7 +190,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 border-y border-white/10 bg-zinc-900/50 py-24 lg:py-32">
+      {/* <section className="relative z-10 border-y border-white/10 bg-zinc-900/50 py-24 lg:py-32">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div className="break-keep-all" data-reveal>
@@ -226,7 +226,7 @@ export function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32" data-reveal>
         <div className="rounded-3xl border border-emerald-200/20 bg-[linear-gradient(130deg,rgba(16,185,129,0.24),rgba(10,10,10,0.65)_62%)] p-8 backdrop-blur xl:p-12">
