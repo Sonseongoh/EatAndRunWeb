@@ -1,7 +1,11 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -12,7 +16,7 @@ import {
   LineElement,
   LinearScale,
   PointElement,
-  Tooltip
+  Tooltip,
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
 import { ActionButton } from "@/app/components/action-button";
@@ -21,7 +25,7 @@ import {
   clearHistoryEntries,
   deleteHistoryEntry,
   fetchHistoryEntries,
-  seedMockHistoryEntries
+  seedMockHistoryEntries,
 } from "@/lib/api";
 import { HistoryEntry } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
@@ -33,8 +37,11 @@ type ConfirmAction =
 
 const PAGE_SIZE = 24;
 const DynamicGoogleRouteMap = dynamic(
-  () => import("@/app/components/google-route-map").then((mod) => mod.GoogleRouteMap),
-  { ssr: false }
+  () =>
+    import("@/app/components/google-route-map").then(
+      (mod) => mod.GoogleRouteMap,
+    ),
+  { ssr: false },
 );
 
 ChartJS.register(
@@ -44,13 +51,13 @@ ChartJS.register(
   LineElement,
   ArcElement,
   Tooltip,
-  Legend
+  Legend,
 );
 
 function formatDateGroup(isoDate: string) {
   const date = new Date(isoDate);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-    date.getDate()
+    date.getDate(),
   ).padStart(2, "0")}`;
 }
 
@@ -63,9 +70,12 @@ export default function HistoryPage() {
   const [modeFilter, setModeFilter] = useState<FilterMode>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(
+    null,
+  );
   const [detailEntry, setDetailEntry] = useState<HistoryEntry | null>(null);
   const [detailRouteIndex, setDetailRouteIndex] = useState(0);
+  const [showTargetOverlay, setShowTargetOverlay] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const historyQuery = useInfiniteQuery({
@@ -79,9 +89,9 @@ export default function HistoryPage() {
         mode: modeFilter,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
-        keyword: keyword || undefined
+        keyword: keyword || undefined,
       }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const {
     fetchNextPage,
@@ -90,31 +100,34 @@ export default function HistoryPage() {
     data,
     isLoading,
     isError,
-    error
+    error,
   } = historyQuery;
 
   const deleteMutation = useMutation({
     mutationFn: deleteHistoryEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["history"] });
-    }
+    },
   });
 
   const clearMutation = useMutation({
     mutationFn: clearHistoryEntries,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["history"] });
-    }
+    },
   });
 
   const seedMutation = useMutation({
     mutationFn: seedMockHistoryEntries,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["history"] });
-    }
+    },
   });
 
-  const entries = useMemo(() => data?.pages.flatMap((page) => page.entries) ?? [], [data]);
+  const entries = useMemo(
+    () => data?.pages.flatMap((page) => page.entries) ?? [],
+    [data],
+  );
   const detailRoute = detailEntry?.routes[detailRouteIndex] ?? null;
 
   const grouped = useMemo(() => {
@@ -129,15 +142,29 @@ export default function HistoryPage() {
   }, [entries]);
 
   const dailyBurnSeries = useMemo(() => {
-    const totals = new Map<string, number>();
+    const actualTotals = new Map<string, number>();
+    const targetTotals = new Map<string, number>();
     entries.forEach((entry) => {
       const key = formatDateGroup(entry.createdAt);
-      const current = totals.get(key) ?? 0;
-      const burn = entry.plan?.targetBurnKcal ?? 0;
-      totals.set(key, current + burn);
+      const currentActual = actualTotals.get(key) ?? 0;
+      const currentTarget = targetTotals.get(key) ?? 0;
+      const burn = entry.routes.reduce(
+        (sum, route) => sum + (route.expectedBurnKcal ?? 0),
+        0,
+      );
+      actualTotals.set(key, currentActual + burn);
+      targetTotals.set(key, currentTarget + (entry.plan?.targetBurnKcal ?? 0));
     });
 
-    return Array.from(totals.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    const labels = Array.from(
+      new Set([...actualTotals.keys(), ...targetTotals.keys()]),
+    ).sort((a, b) => a.localeCompare(b));
+
+    return labels.map((date) => ({
+      date,
+      actual: actualTotals.get(date) ?? 0,
+      target: targetTotals.get(date) ?? 0,
+    }));
   }, [entries]);
 
   const modeDistribution = useMemo(() => {
@@ -152,19 +179,34 @@ export default function HistoryPage() {
 
   const burnLineData = useMemo(
     () => ({
-      labels: dailyBurnSeries.map(([date]) => date),
+      labels: dailyBurnSeries.map((row) => row.date),
       datasets: [
         {
-          label: "일자별 목표 소모(kcal)",
-          data: dailyBurnSeries.map(([, kcal]) => kcal),
+          label: "일자별 실제 소모(kcal)",
+          data: dailyBurnSeries.map((row) => row.actual),
           borderColor: "#14b8a6",
           backgroundColor: "rgba(20,184,166,0.2)",
           fill: true,
-          tension: 0.35
-        }
-      ]
+          tension: 0.35,
+        },
+        ...(showTargetOverlay
+          ? [
+              {
+                label: "일자별 목표 소모(kcal)",
+                data: dailyBurnSeries.map((row) => row.target),
+                borderColor: "rgba(212,212,216,0.9)",
+                backgroundColor: "rgba(212,212,216,0.08)",
+                borderWidth: 2,
+                borderDash: [6, 6],
+                pointRadius: 0,
+                fill: false,
+                tension: 0.25,
+              },
+            ]
+          : []),
+      ],
     }),
-    [dailyBurnSeries]
+    [dailyBurnSeries, showTargetOverlay],
   );
 
   const modeDoughnutData = useMemo(
@@ -173,13 +215,17 @@ export default function HistoryPage() {
       datasets: [
         {
           label: "운동 방식 비율",
-          data: [modeDistribution.walk, modeDistribution.brisk, modeDistribution.run],
+          data: [
+            modeDistribution.walk,
+            modeDistribution.brisk,
+            modeDistribution.run,
+          ],
           backgroundColor: ["#22c55e", "#f59e0b", "#3b82f6"],
-          borderWidth: 0
-        }
-      ]
+          borderWidth: 0,
+        },
+      ],
     }),
-    [modeDistribution]
+    [modeDistribution],
   );
 
   useEffect(() => {
@@ -197,7 +243,7 @@ export default function HistoryPage() {
         if (!entries[0]?.isIntersecting) return;
         fetchNextPage();
       },
-      { rootMargin: "120px 0px", threshold: 0.1 }
+      { rootMargin: "120px 0px", threshold: 0.1 },
     );
 
     observer.observe(node);
@@ -215,13 +261,13 @@ export default function HistoryPage() {
 
     if (confirmAction.type === "clear-all") {
       clearMutation.mutate(undefined, {
-        onSettled: () => setConfirmAction(null)
+        onSettled: () => setConfirmAction(null),
       });
       return;
     }
 
     deleteMutation.mutate(confirmAction.id, {
-      onSettled: () => setConfirmAction(null)
+      onSettled: () => setConfirmAction(null),
     });
   }
 
@@ -234,7 +280,9 @@ export default function HistoryPage() {
     <main className="app-shell md:px-8">
       <section className="glass-card">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">운동 기록</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
+            운동 기록
+          </h1>
           <div className="flex items-center gap-2">
             {showSeedButton && (
               <ActionButton
@@ -259,12 +307,15 @@ export default function HistoryPage() {
           </div>
         </div>
         <p className="mt-2 text-sm text-zinc-300">
-          Supabase에 저장된 기록을 날짜별로 확인하고, 검색/운동 방식/기간 필터를 적용할 수 있습니다.
+          Supabase에 저장된 기록을 날짜별로 확인하고, 검색/운동 방식/기간 필터를
+          적용할 수 있습니다.
         </p>
       </section>
 
       <section className="glass-card">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">검색 및 필터</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+          검색 및 필터
+        </p>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="text"
@@ -285,7 +336,9 @@ export default function HistoryPage() {
           </select>
         </div>
 
-        <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-zinc-400">기간</p>
+        <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+          기간
+        </p>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             type="date"
@@ -317,10 +370,22 @@ export default function HistoryPage() {
 
       {entries.length > 0 && (
         <section className="glass-card">
-          <h2 className="text-lg font-semibold text-zinc-100">기록 요약 차트</h2>
+          <h2 className="text-lg font-semibold text-zinc-100">
+            기록 요약 차트
+          </h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="glass-soft p-4">
-              <p className="mb-3 text-sm font-semibold text-zinc-200">일자별 목표 소모 칼로리</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-200">
+                일자별 소모 칼로리
+              </p>
+              <label className="mb-3 flex items-center gap-2 text-xs text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={showTargetOverlay}
+                  onChange={(event) => setShowTargetOverlay(event.target.checked)}
+                />
+                목표 소모 kcal 같이 보기
+              </label>
               <div className="h-56">
                 <Line
                   data={burnLineData}
@@ -331,19 +396,21 @@ export default function HistoryPage() {
                     scales: {
                       x: {
                         ticks: { color: "#a1a1aa" },
-                        grid: { color: "rgba(255,255,255,0.08)" }
+                        grid: { color: "rgba(255,255,255,0.08)" },
                       },
                       y: {
                         ticks: { color: "#a1a1aa" },
-                        grid: { color: "rgba(255,255,255,0.08)" }
-                      }
-                    }
+                        grid: { color: "rgba(255,255,255,0.08)" },
+                      },
+                    },
                   }}
                 />
               </div>
             </div>
             <div className="glass-soft p-4">
-              <p className="mb-3 text-sm font-semibold text-zinc-200">운동 방식 분포</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-200">
+                운동 방식 분포
+              </p>
               <div className="h-56">
                 <Doughnut
                   data={modeDoughnutData}
@@ -351,8 +418,11 @@ export default function HistoryPage() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      legend: { position: "bottom", labels: { color: "#d4d4d8" } }
-                    }
+                      legend: {
+                        position: "bottom",
+                        labels: { color: "#d4d4d8" },
+                      },
+                    },
                   }}
                 />
               </div>
@@ -383,55 +453,77 @@ export default function HistoryPage() {
         <section key={dateKey} className="glass-card">
           <h2 className="text-lg font-semibold text-zinc-100">{dateKey}</h2>
           <div className="mt-4 space-y-3">
-            {items.map((entry) => (
-              <article
-                key={entry.id}
-                className="glass-soft cursor-pointer border border-transparent p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-300/10 hover:shadow-[0_12px_28px_-16px_rgba(16,185,129,0.85)]"
-                onClick={() => openDetail(entry)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 text-sm text-zinc-200">
-                    <p className="font-semibold text-zinc-100">
-                      {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
-                    </p>
-                    <p className="text-xs text-zinc-400">{new Date(entry.createdAt).toLocaleTimeString()}</p>
-                    <p>
-                      목표: {entry.plan?.targetBurnKcal ?? "-"} kcal ({entry.plan?.burnRatioPercent ?? "-"}%)
-                    </p>
-                    <p>
-                      방식: {entry.plan?.mode ? getActivityLabel(entry.plan.mode) : "미기록"} | 시간: {entry.plan?.durationMin ?? "-"}분
-                    </p>
-                    <p>
-                      프로필: {entry.profile.weightKg}kg, {entry.profile.paceMinPerKm}분/km
-                    </p>
-                    <p>경로: {entry.routes.map((route) => route.name).join(", ")}</p>
+            {items.map((entry) => {
+              const routeBurnKcal = entry.routes.reduce(
+                (sum, route) => sum + (route.expectedBurnKcal ?? 0),
+                0,
+              );
+              return (
+                <article
+                  key={entry.id}
+                  className="glass-soft cursor-pointer border border-transparent p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-300/10 hover:shadow-[0_12px_28px_-16px_rgba(16,185,129,0.85)]"
+                  onClick={() => openDetail(entry)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1 text-sm text-zinc-200">
+                      <p className="font-semibold text-zinc-100">
+                        {entry.analysis.foodName} | {entry.analysis.kcalAvg}{" "}
+                        kcal
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        {new Date(entry.createdAt).toLocaleTimeString()}
+                      </p>
+                      <p>
+                        목표: {entry.plan?.targetBurnKcal ?? "-"} kcal (
+                        {entry.plan?.burnRatioPercent ?? "-"}%)
+                      </p>
+                      <p>코스 소모: {routeBurnKcal} kcal</p>
+                      <p>
+                        방식:{" "}
+                        {entry.plan?.mode
+                          ? getActivityLabel(entry.plan.mode)
+                          : "미기록"}{" "}
+                        | 시간: {entry.plan?.durationMin ?? "-"}분
+                      </p>
+                      <p>
+                        프로필: {entry.profile.weightKg}kg,{" "}
+                        {entry.profile.paceMinPerKm}분/km
+                      </p>
+                      <p>
+                        경로:{" "}
+                        {entry.routes.map((route) => route.name).join(", ")}
+                      </p>
+                    </div>
+                    <ActionButton
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setConfirmAction({
+                          type: "delete-one",
+                          id: entry.id,
+                          label: `${entry.analysis.foodName} (${new Date(
+                            entry.createdAt,
+                          ).toLocaleTimeString()})`,
+                        });
+                      }}
+                      variant="danger"
+                      size="xs"
+                      className="py-1.5"
+                    >
+                      삭제
+                    </ActionButton>
                   </div>
-                  <ActionButton
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setConfirmAction({
-                        type: "delete-one",
-                        id: entry.id,
-                        label: `${entry.analysis.foodName} (${new Date(
-                          entry.createdAt
-                        ).toLocaleTimeString()})`
-                      });
-                    }}
-                    variant="danger"
-                    size="xs"
-                    className="py-1.5"
-                  >
-                    삭제
-                  </ActionButton>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
       ))}
 
       {entries.length > 0 && (
-        <div ref={loadMoreRef} className="py-2 text-center text-xs text-zinc-400">
+        <div
+          ref={loadMoreRef}
+          className="py-2 text-center text-xs text-zinc-400"
+        >
           {hasNextPage
             ? isFetchingNextPage
               ? "기록을 더 불러오는 중입니다..."
@@ -517,15 +609,20 @@ export default function HistoryPage() {
               <>
                 <div className="glass-soft p-3 text-sm text-zinc-200">
                   <p>
-                    선택 코스: <span className="font-semibold">{detailRoute.name}</span>
+                    선택 코스:{" "}
+                    <span className="font-semibold">{detailRoute.name}</span>
                   </p>
                   <p>
-                    거리 {detailRoute.distanceKm}km | 예상 {detailRoute.estimatedMinutes}분 | 소모{" "}
+                    거리 {detailRoute.distanceKm}km | 예상{" "}
+                    {detailRoute.estimatedMinutes}분 | 소모{" "}
                     {detailRoute.expectedBurnKcal}kcal
                   </p>
                 </div>
                 <div className="h-[420px] overflow-hidden rounded-xl border border-white/20 bg-zinc-900/60">
-                  <DynamicGoogleRouteMap center={detailRoute.start} path={detailRoute.path} />
+                  <DynamicGoogleRouteMap
+                    center={detailRoute.start}
+                    path={detailRoute.path}
+                  />
                 </div>
               </>
             ) : (
