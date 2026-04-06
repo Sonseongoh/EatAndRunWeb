@@ -24,6 +24,9 @@ import {
 import { HistoryEntry } from "@/lib/types";
 
 type FilterMode = "all" | "walk" | "brisk" | "run";
+type ConfirmAction =
+  | { type: "delete-one"; id: string; label: string }
+  | { type: "clear-all" };
 
 const PAGE_SIZE = 24;
 
@@ -51,6 +54,7 @@ export default function HistoryPage() {
   const [modeFilter, setModeFilter] = useState<FilterMode>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const historyQuery = useInfiniteQuery({
@@ -183,6 +187,22 @@ export default function HistoryPage() {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const isEmpty = !isLoading && entries.length === 0;
+  const isConfirmPending = deleteMutation.isPending || clearMutation.isPending;
+
+  function onConfirmDelete() {
+    if (!confirmAction) return;
+
+    if (confirmAction.type === "clear-all") {
+      clearMutation.mutate(undefined, {
+        onSettled: () => setConfirmAction(null)
+      });
+      return;
+    }
+
+    deleteMutation.mutate(confirmAction.id, {
+      onSettled: () => setConfirmAction(null)
+    });
+  }
 
   return (
     <main className="app-shell md:px-8">
@@ -202,7 +222,7 @@ export default function HistoryPage() {
               </ActionButton>
             )}
             <ActionButton
-              onClick={() => clearMutation.mutate()}
+              onClick={() => setConfirmAction({ type: "clear-all" })}
               disabled={clearMutation.isPending || entries.length === 0}
               variant="danger"
               size="xs"
@@ -357,7 +377,15 @@ export default function HistoryPage() {
                     <p>경로: {entry.routes.map((route) => route.name).join(", ")}</p>
                   </div>
                   <ActionButton
-                    onClick={() => deleteMutation.mutate(entry.id)}
+                    onClick={() =>
+                      setConfirmAction({
+                        type: "delete-one",
+                        id: entry.id,
+                        label: `${entry.analysis.foodName} (${new Date(
+                          entry.createdAt
+                        ).toLocaleTimeString()})`
+                      })
+                    }
                     variant="danger"
                     size="xs"
                     className="py-1.5"
@@ -378,6 +406,37 @@ export default function HistoryPage() {
               ? "기록을 더 불러오는 중입니다..."
               : "아래로 스크롤하면 기록을 더 불러옵니다."
             : "모든 기록을 불러왔습니다."}
+        </div>
+      )}
+
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="glass-card w-full max-w-md space-y-4 border border-white/20">
+            <h3 className="text-lg font-semibold text-zinc-100">삭제 확인</h3>
+            <p className="text-sm text-zinc-300">
+              {confirmAction.type === "clear-all"
+                ? "모든 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다."
+                : `해당 기록을 삭제할까요? (${confirmAction.label})`}
+            </p>
+            <div className="flex justify-end gap-2">
+              <ActionButton
+                onClick={() => setConfirmAction(null)}
+                variant="ghost"
+                size="xs"
+                disabled={isConfirmPending}
+              >
+                취소
+              </ActionButton>
+              <ActionButton
+                onClick={onConfirmDelete}
+                variant="danger"
+                size="xs"
+                disabled={isConfirmPending}
+              >
+                {isConfirmPending ? "삭제 중..." : "삭제하기"}
+              </ActionButton>
+            </div>
+          </div>
         </div>
       )}
     </main>

@@ -32,6 +32,7 @@ export function Step3Map() {
     useRunProfileStore();
   const [saveError, setSaveError] = useState("");
   const savedKeyRef = useRef<string>("");
+  const routeRequestKeyRef = useRef<string>("");
 
   const routeMutation = useMutation({
     mutationFn: recommendRunningRoutes
@@ -62,6 +63,19 @@ export function Step3Map() {
   useEffect(() => {
     if (!analysis || !mode || !durationMin) return;
     if (routes.length > 0 || routeMutation.isPending) return;
+
+    const requestKey = [
+      analysis.foodName,
+      mode,
+      durationMin,
+      burnRatioPercent,
+      weightKg,
+      paceMinPerKm,
+      startLat,
+      startLng
+    ].join("|");
+    if (routeRequestKeyRef.current === requestKey) return;
+    routeRequestKeyRef.current = requestKey;
 
     routeMutation.mutate(
       {
@@ -124,8 +138,19 @@ export function Step3Map() {
     weightKg
   ]);
 
+  useEffect(() => {
+    if (!routeMutation.isError) return;
+    const message =
+      routeMutation.error instanceof Error ? routeMutation.error.message : "";
+    if (message.includes("로그인")) {
+      router.replace("/login");
+    }
+  }, [routeMutation.error, routeMutation.isError, router]);
+
   function onGetCurrentLocation() {
     if (!navigator.geolocation) return;
+    routeMutation.reset();
+    routeRequestKeyRef.current = "";
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setStart(position.coords.latitude, position.coords.longitude);
@@ -134,6 +159,12 @@ export function Step3Map() {
       () => {},
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  }
+
+  function onRetryRouteRecommend() {
+    routeMutation.reset();
+    routeRequestKeyRef.current = "";
+    setRoutes([]);
   }
 
   if (!analysis || !mode || !durationMin) return null;
@@ -166,7 +197,16 @@ export function Step3Map() {
           <p className="text-sm text-zinc-400">경로를 불러오는 중입니다...</p>
         )}
         {routeMutation.isError && routes.length === 0 && (
-          <p className="text-sm text-red-300">{(routeMutation.error as Error).message}</p>
+          <div className="space-y-2">
+            <p className="text-sm text-red-300">{(routeMutation.error as Error).message}</p>
+            <ActionButton
+              onClick={onRetryRouteRecommend}
+              variant="ghost"
+              size="xs"
+            >
+              경로 다시 시도
+            </ActionButton>
+          </div>
         )}
 
         {!routes.length ? (
