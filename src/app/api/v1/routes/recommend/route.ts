@@ -24,6 +24,8 @@ type RouteResult = {
 };
 
 const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
+const MIN_ROUTE_DISTANCE_KM = 0.2;
+const MIN_ONE_WAY_DISTANCE_KM = 0.12;
 
 function destinationPoint(start: Point, distanceKm: number, bearingDeg: number) {
   const R = 6371;
@@ -188,7 +190,7 @@ export async function POST(req: NextRequest) {
 
   const start = { lat: body.startLat, lng: body.startLng };
   const burnPerKm = calcBurnPerKm(body.weightKg);
-  const targetDistanceKm = Math.max(1, body.targetKcal / burnPerKm);
+  const targetDistanceKm = Math.max(MIN_ROUTE_DISTANCE_KM, body.targetKcal / burnPerKm);
 
   const templates = [
     { id: "course-a", name: "코스 A", ratio: 0.85, bearing: 35, tags: ["짧은 거리", "완만"] },
@@ -201,7 +203,7 @@ export async function POST(req: NextRequest) {
     const routes = await Promise.all(
       templates.map(async (template) => {
         const targetKm = Number((targetDistanceKm * template.ratio).toFixed(1));
-        const oneWayKm = Math.max(0.6, targetKm / 2);
+        const oneWayKm = Math.max(MIN_ONE_WAY_DISTANCE_KM, targetKm / 2);
         const destination = destinationPoint(start, oneWayKm, template.bearing);
         const { route, provider: pickedProvider } = await getRouteWithProvider(
           start,
