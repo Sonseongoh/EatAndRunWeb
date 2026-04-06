@@ -66,18 +66,24 @@ export function Step2Activity() {
       </section>
 
       <section className="glass-card flex min-h-[32rem] flex-col space-y-6 md:min-h-[36rem]">
-        <div className="glass-soft p-6 mt-6">
-          <div className="flex items-center justify-between">
+        <div className="glass-soft mt-6 p-6">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-zinc-200">
               목표 소모 칼로리:{" "}
-              <span className="font-semibold">{targetBurnKcal} kcal</span>
+              <span className="inline-block whitespace-nowrap font-semibold">
+                {targetBurnKcal} kcal
+              </span>
             </p>
             <p className="text-xs text-zinc-400">
-              (섭취 {analysis.kcalAvg} kcal의 {burnRatioPercent}%)
+              (섭취{" "}
+              <span className="whitespace-nowrap">{analysis.kcalAvg} kcal</span>
+              의 {burnRatioPercent}%)
             </p>
           </div>
           <div className="mt-3 flex items-center gap-3">
-            <span className="text-xs text-zinc-400">비율</span>
+            <span className="shrink-0 whitespace-nowrap text-xs text-zinc-400">
+              비율
+            </span>
             <input
               type="range"
               min={10}
@@ -98,9 +104,9 @@ export function Step2Activity() {
                 if (!Number.isFinite(next)) return;
                 setBurnRatioPercent(Math.min(80, Math.max(10, next)));
               }}
-              className="glass-input w-16 rounded-md px-2 py-1 text-xs"
+              className="glass-input w-16 shrink-0 rounded-md px-2 py-1 text-xs"
             />
-            <span className="text-xs text-zinc-300">%</span>
+            <span className="shrink-0 text-xs text-zinc-300">%</span>
           </div>
         </div>
 

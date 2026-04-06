@@ -45,6 +45,7 @@ function formatDateGroup(isoDate: string) {
 }
 
 export default function HistoryPage() {
+  const showSeedButton = process.env.NODE_ENV !== "production";
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState("");
   const [modeFilter, setModeFilter] = useState<FilterMode>("all");
@@ -189,15 +190,17 @@ export default function HistoryPage() {
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">운동 기록</h1>
           <div className="flex items-center gap-2">
-            <ActionButton
-              onClick={() => seedMutation.mutate()}
-              disabled={seedMutation.isPending}
-              variant="ghost"
-              size="xs"
-              className="disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              테스트 데이터 채우기
-            </ActionButton>
+            {showSeedButton && (
+              <ActionButton
+                onClick={() => seedMutation.mutate()}
+                disabled={seedMutation.isPending}
+                variant="ghost"
+                size="xs"
+                className="disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                테스트 데이터 채우기
+              </ActionButton>
+            )}
             <ActionButton
               onClick={() => clearMutation.mutate()}
               disabled={clearMutation.isPending || entries.length === 0}
