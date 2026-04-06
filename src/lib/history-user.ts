@@ -19,7 +19,10 @@ export function applyHistoryUserCookie(
   shouldSetCookie: boolean
 ) {
   if (!shouldSetCookie) return;
+  setHistoryUserCookie(response, userId);
+}
 
+export function setHistoryUserCookie(response: NextResponse, userId: string) {
   response.cookies.set(HISTORY_USER_COOKIE_NAME, userId, {
     httpOnly: true,
     sameSite: "lax",

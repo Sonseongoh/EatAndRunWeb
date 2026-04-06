@@ -1,12 +1,40 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { AnalyzeMethod, AnalyzeMethodTabs } from "@/app/components/analyze-method-tabs";
 import { PhotoAnalyzeForm } from "@/app/components/photo-analyze-form";
 import { TextAnalyzeForm } from "@/app/components/text-analyze-form";
+import { checkAuthAccess } from "@/lib/api";
 
 export function Step1Analyze() {
+  const router = useRouter();
   const [method, setMethod] = useState<AnalyzeMethod>("photo");
+  const [isAccessChecking, setIsAccessChecking] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    void checkAuthAccess()
+      .then((result) => {
+        if (!mounted) return;
+        if (!result.allowed) {
+          router.replace("/login");
+          return;
+        }
+        setIsAccessChecking(false);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        router.replace("/login");
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+
+  if (isAccessChecking) return null;
 
   return (
     <main className="app-shell md:px-8">
@@ -24,3 +52,4 @@ export function Step1Analyze() {
     </main>
   );
 }
+

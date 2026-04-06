@@ -5,11 +5,22 @@ import { FormEvent, useEffect, useState } from "react";
 import { ActionButton } from "@/app/components/action-button";
 import { useAuth } from "@/providers/auth-provider";
 
+type OAuthProvider = "google" | "kakao";
+type VisibleOAuthProvider = "google";
+
+const OAUTH_LABELS: Record<OAuthProvider, string> = {
+  google: "Google로 로그인",
+  kakao: "Kakao로 로그인"
+};
+
+const VISIBLE_OAUTH_PROVIDERS: VisibleOAuthProvider[] = ["google"];
+
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, signInWithOtp } = useAuth();
+  const { isAuthenticated, isLoading, signInWithOtp, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [oauthPending, setOauthPending] = useState<OAuthProvider | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSent, setIsSent] = useState(false);
 
@@ -42,15 +53,45 @@ export default function LoginPage() {
     }
   }
 
+  async function onOAuth(provider: OAuthProvider) {
+    setErrorMessage("");
+    setOauthPending(provider);
+    try {
+      await signInWithOAuth(provider);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "소셜 로그인에 실패했습니다.";
+      setErrorMessage(message);
+      setOauthPending(null);
+    }
+  }
+
   return (
     <main className="app-shell md:px-8">
       <section className="glass-card mx-auto w-full max-w-xl">
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">로그인</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          첫 체험 이후에는 로그인이 필요합니다. 이메일 링크로 빠르게 로그인하세요.
+          Google/Kakao 또는 이메일 링크로 로그인할 수 있습니다.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-3">
+        <div className="mt-6 grid gap-2">
+          {VISIBLE_OAUTH_PROVIDERS.map((provider) => (
+            <ActionButton
+              key={provider}
+              onClick={() => void onOAuth(provider)}
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              disabled={Boolean(oauthPending)}
+            >
+              {oauthPending === provider ? "연결 중..." : OAUTH_LABELS[provider]}
+            </ActionButton>
+          ))}
+        </div>
+
+        <div className="my-5 h-px bg-white/10" />
+
+        <form onSubmit={onSubmit} className="space-y-3">
           <input
             type="email"
             value={email}
@@ -64,9 +105,9 @@ export default function LoginPage() {
             variant="primary"
             size="sm"
             className="w-full"
-            disabled={isPending}
+            disabled={isPending || Boolean(oauthPending)}
           >
-            {isPending ? "전송 중..." : "로그인 링크 보내기"}
+            {isPending ? "전송 중..." : "이메일 링크 보내기"}
           </ActionButton>
         </form>
 
@@ -80,4 +121,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

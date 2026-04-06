@@ -16,6 +16,24 @@ async function getAuthHeaders(contentType?: string) {
   return headers;
 }
 
+export async function checkAuthAccess() {
+  const response = await fetch("/api/v1/auth/access", {
+    method: "GET",
+    headers: await getAuthHeaders()
+  });
+
+  if (response.status === 401) {
+    return { allowed: false as const };
+  }
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.error?.message ?? "접근 권한 확인에 실패했습니다.");
+  }
+
+  return { allowed: true as const };
+}
+
 export async function analyzeFoodImage(file: File): Promise<FoodAnalysisResponse> {
   const formData = new FormData();
   formData.append("image", file);
@@ -175,3 +193,17 @@ export async function seedMockHistoryEntries(): Promise<number> {
   return payload.inserted as number;
 }
 
+export async function migrateGuestHistoryToAccount(): Promise<number> {
+  const response = await fetch("/api/v1/history/migrate", {
+    method: "POST",
+    headers: await getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.error?.message ?? "기록 이관에 실패했습니다.");
+  }
+
+  const payload = await response.json();
+  return Number(payload?.migrated ?? 0);
+}
