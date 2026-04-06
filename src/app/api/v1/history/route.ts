@@ -21,7 +21,7 @@ function toEndOfDayKstIso(date: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    const access = await resolveAccessContext(request, { allowGuest: true });
+    const access = await resolveAccessContext(request, { allowGuest: false });
     if (access.kind === "denied") return createLoginRequiredResponse();
 
     const supabase = createSupabaseServerClient();

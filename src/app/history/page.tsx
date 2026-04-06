@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
   ArcElement,
   CategoryScale,
@@ -22,6 +23,7 @@ import {
   seedMockHistoryEntries
 } from "@/lib/api";
 import { HistoryEntry } from "@/lib/types";
+import { useAuth } from "@/providers/auth-provider";
 
 type FilterMode = "all" | "walk" | "brisk" | "run";
 type ConfirmAction =
@@ -48,6 +50,8 @@ function formatDateGroup(isoDate: string) {
 }
 
 export default function HistoryPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const showSeedButton = process.env.NODE_ENV !== "production";
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState("");
@@ -59,6 +63,7 @@ export default function HistoryPage() {
 
   const historyQuery = useInfiniteQuery({
     queryKey: ["history", { keyword, modeFilter, startDate, endDate }],
+    enabled: !isAuthLoading && isAuthenticated,
     initialPageParam: null as string | null,
     queryFn: ({ pageParam }) =>
       fetchHistoryEntries({
@@ -168,6 +173,11 @@ export default function HistoryPage() {
     }),
     [modeDistribution]
   );
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    if (!isAuthenticated) router.replace("/login");
+  }, [isAuthLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
