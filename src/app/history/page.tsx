@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   ArcElement,
@@ -31,6 +32,10 @@ type ConfirmAction =
   | { type: "clear-all" };
 
 const PAGE_SIZE = 24;
+const DynamicGoogleRouteMap = dynamic(
+  () => import("@/app/components/google-route-map").then((mod) => mod.GoogleRouteMap),
+  { ssr: false }
+);
 
 ChartJS.register(
   CategoryScale,
@@ -59,6 +64,8 @@ export default function HistoryPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [detailEntry, setDetailEntry] = useState<HistoryEntry | null>(null);
+  const [detailRouteIndex, setDetailRouteIndex] = useState(0);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const historyQuery = useInfiniteQuery({
@@ -108,6 +115,7 @@ export default function HistoryPage() {
   });
 
   const entries = useMemo(() => data?.pages.flatMap((page) => page.entries) ?? [], [data]);
+  const detailRoute = detailEntry?.routes[detailRouteIndex] ?? null;
 
   const grouped = useMemo(() => {
     const map = new Map<string, HistoryEntry[]>();
@@ -215,6 +223,11 @@ export default function HistoryPage() {
     deleteMutation.mutate(confirmAction.id, {
       onSettled: () => setConfirmAction(null)
     });
+  }
+
+  function openDetail(entry: HistoryEntry) {
+    setDetailEntry(entry);
+    setDetailRouteIndex(0);
   }
 
   return (
@@ -371,7 +384,11 @@ export default function HistoryPage() {
           <h2 className="text-lg font-semibold text-zinc-100">{dateKey}</h2>
           <div className="mt-4 space-y-3">
             {items.map((entry) => (
-              <article key={entry.id} className="glass-soft p-4">
+              <article
+                key={entry.id}
+                className="glass-soft cursor-pointer border border-transparent p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-300/10 hover:shadow-[0_12px_28px_-16px_rgba(16,185,129,0.85)]"
+                onClick={() => openDetail(entry)}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 text-sm text-zinc-200">
                     <p className="font-semibold text-zinc-100">
@@ -390,15 +407,16 @@ export default function HistoryPage() {
                     <p>경로: {entry.routes.map((route) => route.name).join(", ")}</p>
                   </div>
                   <ActionButton
-                    onClick={() =>
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setConfirmAction({
                         type: "delete-one",
                         id: entry.id,
                         label: `${entry.analysis.foodName} (${new Date(
                           entry.createdAt
                         ).toLocaleTimeString()})`
-                      })
-                    }
+                      });
+                    }}
                     variant="danger"
                     size="xs"
                     className="py-1.5"
@@ -449,6 +467,72 @@ export default function HistoryPage() {
                 {isConfirmPending ? "삭제 중..." : "삭제하기"}
               </ActionButton>
             </div>
+          </div>
+        </div>
+      )}
+
+      {detailEntry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="glass-card w-full max-w-4xl space-y-4 border border-white/20">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold text-zinc-100">
+                  {detailEntry.analysis.foodName} 경로 상세
+                </h3>
+                <p className="mt-1 text-sm text-zinc-300">
+                  {new Date(detailEntry.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <ActionButton
+                onClick={() => setDetailEntry(null)}
+                variant="ghost"
+                size="xs"
+              >
+                닫기
+              </ActionButton>
+            </div>
+
+            {detailEntry.routes.length > 1 && (
+              <div className="grid gap-2 md:grid-cols-2">
+                {detailEntry.routes.map((route, index) => (
+                  <button
+                    key={route.id}
+                    type="button"
+                    onClick={() => setDetailRouteIndex(index)}
+                    className={`rounded-lg border px-3 py-2 text-left text-xs ${
+                      detailRouteIndex === index
+                        ? "border-emerald-300 bg-emerald-300 text-zinc-900"
+                        : "border-white/20 bg-zinc-900/60 text-zinc-200"
+                    }`}
+                  >
+                    <p className="font-semibold">{route.name}</p>
+                    <p>거리 {route.distanceKm}km</p>
+                    <p>예상 {route.estimatedMinutes}분</p>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {detailRoute ? (
+              <>
+                <div className="glass-soft p-3 text-sm text-zinc-200">
+                  <p>
+                    선택 코스: <span className="font-semibold">{detailRoute.name}</span>
+                  </p>
+                  <p>
+                    거리 {detailRoute.distanceKm}km | 예상 {detailRoute.estimatedMinutes}분 | 소모{" "}
+                    {detailRoute.expectedBurnKcal}kcal
+                  </p>
+                </div>
+                <div className="h-[420px] overflow-hidden rounded-xl border border-white/20 bg-zinc-900/60">
+                  <DynamicGoogleRouteMap center={detailRoute.start} path={detailRoute.path} />
+                </div>
+              </>
+            ) : (
+              <div className="glass-soft p-4 text-sm text-zinc-400">
+                저장된 경로 정보가 없습니다.
+              </div>
+            )}
           </div>
         </div>
       )}
