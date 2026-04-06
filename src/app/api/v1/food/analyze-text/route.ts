@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { HISTORY_USER_COOKIE_NAME } from "@/lib/history-user";
+import {
+  applyAccessCookies,
+  createLoginRequiredResponse,
+  resolveAccessContext
+} from "@/lib/auth-access";
 
 const analyzeApiUrl = process.env.ANALYZE_API_URL;
 const backendApiKey = process.env.BACKEND_API_KEY;
@@ -20,6 +24,9 @@ function resolveTextAnalyzeUrl() {
 }
 
 export async function POST(req: NextRequest) {
+  const access = await resolveAccessContext(req, { allowGuest: true });
+  if (access.kind === "denied") return createLoginRequiredResponse();
+
   const textAnalyzeUrl = resolveTextAnalyzeUrl();
   if (!textAnalyzeUrl) {
     return NextResponse.json(
@@ -52,13 +59,10 @@ export async function POST(req: NextRequest) {
   const headers: HeadersInit = {
     "Content-Type": "application/json"
   };
-  const historyUserId = req.cookies.get(HISTORY_USER_COOKIE_NAME)?.value?.trim();
   if (backendApiKey) {
     headers.Authorization = `Bearer ${backendApiKey}`;
   }
-  if (historyUserId) {
-    headers["X-User-Id"] = historyUserId;
-  }
+  headers["X-User-Id"] = access.userId;
 
   const upstream = await fetch(textAnalyzeUrl, {
     method: "POST",
@@ -81,5 +85,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json(payload, { status: 200 });
+  const response = NextResponse.json(payload, { status: 200 });
+  applyAccessCookies(response, access);
+  return response;
 }

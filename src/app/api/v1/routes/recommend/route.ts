@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  applyAccessCookies,
+  createLoginRequiredResponse,
+  resolveAccessContext
+} from "@/lib/auth-access";
 import { calcBurnPerKm } from "@/lib/running";
 
 type RequestBody = {
@@ -165,6 +170,9 @@ function validateBody(body: RequestBody) {
 }
 
 export async function POST(req: NextRequest) {
+  const access = await resolveAccessContext(req, { allowGuest: true });
+  if (access.kind === "denied") return createLoginRequiredResponse();
+
   const body = (await req.json()) as RequestBody;
 
   try {
@@ -227,10 +235,12 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { routes, provider, generatedAt: new Date().toISOString() },
       { status: 200 }
     );
+    applyAccessCookies(response, access);
+    return response;
   } catch (error) {
     return NextResponse.json(
       {

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  applyAccessCookies,
+  createLoginRequiredResponse,
+  resolveAccessContext
+} from "@/lib/auth-access";
 import { getErrorMessage } from "@/lib/error-message";
 import { fromHistoryDbRow, HistoryDbRow, toHistoryDbRow } from "@/lib/history-record";
-import { applyHistoryUserCookie, resolveHistoryUserId } from "@/lib/history-user";
 import { HistoryEntry } from "@/lib/types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -17,7 +21,9 @@ function toEndOfDayKstIso(date: string) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
+    const access = await resolveAccessContext(request, { allowGuest: true });
+    if (access.kind === "denied") return createLoginRequiredResponse();
+
     const supabase = createSupabaseServerClient();
     const searchParams = request.nextUrl.searchParams;
     const limit = Math.min(
@@ -33,7 +39,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from(TABLE)
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", access.userId)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -54,7 +60,7 @@ export async function GET(request: NextRequest) {
     const nextCursor = rows.length === limit ? rows[rows.length - 1]?.created_at ?? null : null;
 
     const response = NextResponse.json({ entries, nextCursor });
-    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    applyAccessCookies(response, access);
     return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 조회에 실패했습니다.");
@@ -64,7 +70,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
+    const access = await resolveAccessContext(request, { allowGuest: true });
+    if (access.kind === "denied") return createLoginRequiredResponse();
+
     const supabase = createSupabaseServerClient();
     const body = (await request.json()) as { entry?: HistoryEntry };
     const entry = body.entry;
@@ -74,13 +82,13 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from(TABLE)
-      .insert({ ...toHistoryDbRow(entry), user_id: userId })
+      .insert({ ...toHistoryDbRow(entry), user_id: access.userId })
       .select("*")
       .single();
     if (error) throw error;
 
     const response = NextResponse.json({ entry: fromHistoryDbRow(data as HistoryDbRow) });
-    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    applyAccessCookies(response, access, { markTrialUsed: access.kind === "guest" });
     return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 저장에 실패했습니다.");
@@ -90,17 +98,19 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId, shouldSetCookie } = resolveHistoryUserId(request);
+    const access = await resolveAccessContext(request, { allowGuest: true });
+    if (access.kind === "denied") return createLoginRequiredResponse();
+
     const supabase = createSupabaseServerClient();
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get("id");
     const clear = searchParams.get("clear") === "true";
 
     if (clear) {
-      const { error } = await supabase.from(TABLE).delete().eq("user_id", userId);
+      const { error } = await supabase.from(TABLE).delete().eq("user_id", access.userId);
       if (error) throw error;
       const response = NextResponse.json({ ok: true });
-      applyHistoryUserCookie(response, userId, shouldSetCookie);
+      applyAccessCookies(response, access);
       return response;
     }
 
@@ -108,10 +118,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: { message: "id가 필요합니다." } }, { status: 400 });
     }
 
-    const { error } = await supabase.from(TABLE).delete().eq("id", id).eq("user_id", userId);
+    const { error } = await supabase
+      .from(TABLE)
+      .delete()
+      .eq("id", id)
+      .eq("user_id", access.userId);
     if (error) throw error;
     const response = NextResponse.json({ ok: true });
-    applyHistoryUserCookie(response, userId, shouldSetCookie);
+    applyAccessCookies(response, access);
     return response;
   } catch (error) {
     const message = getErrorMessage(error, "기록 삭제에 실패했습니다.");

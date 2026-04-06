@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/providers/auth-provider";
 
 const menus = [
   { href: "/", label: "홈" },
@@ -11,6 +12,7 @@ const menus = [
 
 export function TopNav() {
   const pathname = usePathname();
+  const { isAuthenticated, isLoading, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
@@ -41,6 +43,23 @@ export function TopNav() {
               </Link>
             );
           })}
+          {!isLoading && !isAuthenticated ? (
+            <Link
+              href="/login"
+              className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold text-zinc-100 hover:bg-white/10"
+            >
+              로그인
+            </Link>
+          ) : null}
+          {!isLoading && isAuthenticated ? (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold text-zinc-100 hover:bg-white/10"
+            >
+              로그아웃
+            </button>
+          ) : null}
         </div>
       </nav>
     </header>

@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import { AuthProvider } from "@/providers/auth-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { TopNav } from "./components/top-nav";
 
@@ -31,8 +32,10 @@ export default function RootLayout({
           src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"
         />
         <QueryProvider>
-          <TopNav />
-          {children}
+          <AuthProvider>
+            <TopNav />
+            {children}
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

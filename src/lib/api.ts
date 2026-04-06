@@ -1,9 +1,20 @@
-﻿import {
-  HistoryEntry,
+import { getAccessToken } from "@/lib/supabase-client";
+import {
   FoodAnalysisResponse,
+  HistoryEntry,
   RouteRecommendation,
   RouteRecommendRequest
 } from "./types";
+
+async function getAuthHeaders(contentType?: string) {
+  const headers: Record<string, string> = {};
+  if (contentType) headers["Content-Type"] = contentType;
+
+  const accessToken = await getAccessToken();
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+  return headers;
+}
 
 export async function analyzeFoodImage(file: File): Promise<FoodAnalysisResponse> {
   const formData = new FormData();
@@ -12,6 +23,7 @@ export async function analyzeFoodImage(file: File): Promise<FoodAnalysisResponse
 
   const response = await fetch("/api/v1/food/analyze", {
     method: "POST",
+    headers: await getAuthHeaders(),
     body: formData
   });
 
@@ -30,9 +42,7 @@ export async function analyzeFoodImage(file: File): Promise<FoodAnalysisResponse
 export async function analyzeFoodText(text: string): Promise<FoodAnalysisResponse> {
   const response = await fetch("/api/v1/food/analyze-text", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: await getAuthHeaders("application/json"),
     body: JSON.stringify({
       text,
       locale: "ko-KR"
@@ -56,9 +66,7 @@ export async function recommendRunningRoutes(
 ): Promise<RouteRecommendation[]> {
   const response = await fetch("/api/v1/routes/recommend", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: await getAuthHeaders("application/json"),
     body: JSON.stringify(request)
   });
 
@@ -100,7 +108,8 @@ export async function fetchHistoryEntries(
   if (request.keyword?.trim()) searchParams.set("q", request.keyword.trim());
 
   const response = await fetch(`/api/v1/history?${searchParams.toString()}`, {
-    method: "GET"
+    method: "GET",
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -114,7 +123,7 @@ export async function fetchHistoryEntries(
 export async function saveHistoryEntry(entry: HistoryEntry): Promise<HistoryEntry> {
   const response = await fetch("/api/v1/history", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: await getAuthHeaders("application/json"),
     body: JSON.stringify({ entry })
   });
 
@@ -129,7 +138,8 @@ export async function saveHistoryEntry(entry: HistoryEntry): Promise<HistoryEntr
 
 export async function deleteHistoryEntry(id: string): Promise<void> {
   const response = await fetch(`/api/v1/history?id=${encodeURIComponent(id)}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -140,7 +150,8 @@ export async function deleteHistoryEntry(id: string): Promise<void> {
 
 export async function clearHistoryEntries(): Promise<void> {
   const response = await fetch("/api/v1/history?clear=true", {
-    method: "DELETE"
+    method: "DELETE",
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -151,7 +162,8 @@ export async function clearHistoryEntries(): Promise<void> {
 
 export async function seedMockHistoryEntries(): Promise<number> {
   const response = await fetch("/api/v1/history/seed", {
-    method: "POST"
+    method: "POST",
+    headers: await getAuthHeaders()
   });
 
   if (!response.ok) {
@@ -162,3 +174,4 @@ export async function seedMockHistoryEntries(): Promise<number> {
   const payload = await response.json();
   return payload.inserted as number;
 }
+
