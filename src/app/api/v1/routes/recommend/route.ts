@@ -213,11 +213,10 @@ export async function POST(req: NextRequest) {
         if (pickedProvider === "osrm" && provider !== "google-directions") provider = "osrm";
 
         const expectedBurnKcal = Math.round(route.distanceKm * burnPerKm);
-        const hasDurationBaseline =
-          Number.isFinite(body.targetDurationMin) && Number(body.targetDurationMin) > 0;
-        const estimatedMinutes = hasDurationBaseline
-          ? Math.max(1, Math.round(Number(body.targetDurationMin)))
-          : Math.max(1, Math.round(route.distanceKm * body.paceMinPerKm));
+        const paceBasedMinutes = Number.isFinite(body.paceMinPerKm)
+          ? Math.ceil(route.distanceKm * body.paceMinPerKm)
+          : 0;
+        const estimatedMinutes = Math.max(1, paceBasedMinutes || route.durationMin);
         const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${start.lat},${start.lng}&destination=${destination.lat},${destination.lng}&travelmode=walking`;
 
         return {
