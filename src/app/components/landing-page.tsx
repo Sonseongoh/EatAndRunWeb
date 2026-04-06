@@ -93,10 +93,10 @@ export function LandingPage() {
                 <iconify-icon icon="solar:bolt-circle-linear" />
                 Eat & Run 루틴 자동화
               </p>
-              <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
+              <h1 className="mt-6 break-keep-all text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
                 먹은 만큼,
                 <br />
-                가장 실행하기 쉬운 러닝으로
+                가장 실행하기 쉬운 <span className="whitespace-nowrap">러닝으로</span>
                 <span className="block bg-gradient-to-r from-emerald-300 to-amber-300 bg-clip-text text-transparent">
                   오늘 바로 연결합니다
                 </span>
