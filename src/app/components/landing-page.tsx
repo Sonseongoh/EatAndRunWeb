@@ -278,9 +278,6 @@ export function LandingPage() {
             <Link href="/history" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
               기록 보기
             </Link>
-            <Link href="/map" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              지도 미리보기
-            </Link>
           </nav>
         </div>
       </footer>
