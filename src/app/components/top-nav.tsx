@@ -15,7 +15,12 @@ export function TopNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <p className="text-sm font-bold tracking-tight text-white">Eat & Run</p>
+        <Link
+          href="/"
+          className="text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+        >
+          Eat & Run
+        </Link>
         <div className="flex items-center gap-2">
           {menus.map((menu) => {
             const active =
