@@ -95,30 +95,6 @@ export function Step3Map() {
         onSuccess: (nextRoutes) => {
           setRoutes(nextRoutes);
           setSaveError("");
-          const entry = {
-            id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-            createdAt: new Date().toISOString(),
-            analysis,
-            plan: {
-              mode,
-              durationMin,
-              burnRatioPercent,
-              targetBurnKcal
-            },
-            profile: {
-              weightKg,
-              paceMinPerKm,
-              startLat,
-              startLng
-            },
-            routes: nextRoutes
-          };
-
-          const saveKey = `${entry.createdAt}-${entry.analysis.foodName}-${entry.plan.mode}`;
-          if (savedKeyRef.current === saveKey) return;
-          savedKeyRef.current = saveKey;
-
-          saveMutation.mutate(entry);
         }
       }
     );
@@ -129,7 +105,6 @@ export function Step3Map() {
     mode,
     paceMinPerKm,
     routeMutation,
-    saveMutation,
     routes.length,
     setRoutes,
     startLat,
@@ -172,6 +147,55 @@ export function Step3Map() {
   const selectedRoute = routes[selectedRouteIndex] || null;
   const center = selectedRoute?.start || { lat: startLat, lng: startLng };
   const path = selectedRoute?.path || [];
+
+  async function onGoHistory() {
+    if (!analysis || !mode || !durationMin || !selectedRoute) {
+      router.push("/history");
+      return;
+    }
+
+    const saveKey = [
+      analysis.foodName,
+      analysis.kcalMin,
+      analysis.kcalMax,
+      mode,
+      durationMin,
+      burnRatioPercent,
+      targetBurnKcal,
+      weightKg,
+      paceMinPerKm,
+      selectedRoute.id
+    ].join("|");
+
+    if (savedKeyRef.current !== saveKey) {
+      savedKeyRef.current = saveKey;
+      setSaveError("");
+      try {
+        await saveMutation.mutateAsync({
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          createdAt: new Date().toISOString(),
+          analysis,
+          plan: {
+            mode,
+            durationMin,
+            burnRatioPercent,
+            targetBurnKcal
+          },
+          profile: {
+            weightKg,
+            paceMinPerKm,
+            startLat,
+            startLng
+          },
+          routes: [selectedRoute]
+        });
+      } catch {
+        return;
+      }
+    }
+
+    router.push("/history");
+  }
 
   return (
     <main className="app-shell md:px-8">
@@ -262,13 +286,14 @@ export function Step3Map() {
             현재 위치 다시 가져오기
           </ActionButton>
           <ActionButton
-            href="/history"
+            onClick={() => void onGoHistory()}
             variant="primary"
             size="xs"
+            disabled={saveMutation.isPending}
             icon={<span>→</span>}
             iconPosition="right"
           >
-            기록 화면으로
+            {saveMutation.isPending ? "저장 중..." : "기록 화면으로"}
           </ActionButton>
         </div>
       </section>
