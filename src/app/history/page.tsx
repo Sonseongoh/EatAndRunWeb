@@ -196,6 +196,9 @@ export default function HistoryPage() {
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  if (isAuthLoading) return null;
+  if (!isAuthenticated) return null;
+
   const isEmpty = !isLoading && entries.length === 0;
   const isConfirmPending = deleteMutation.isPending || clearMutation.isPending;
 
