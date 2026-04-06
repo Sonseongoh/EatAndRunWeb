@@ -1,8 +1,9 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { useFlowStore } from "@/store/use-flow-store";
 
 const menus = [
   { href: "/", label: "홈" },
@@ -12,7 +13,15 @@ const menus = [
 
 export function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isAuthenticated, isLoading, signOut } = useAuth();
+  const resetFlow = useFlowStore((state) => state.resetFlow);
+
+  async function onLogout() {
+    await signOut();
+    resetFlow();
+    router.replace("/login");
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
@@ -54,7 +63,7 @@ export function TopNav() {
           {!isLoading && isAuthenticated ? (
             <button
               type="button"
-              onClick={() => void signOut()}
+              onClick={() => void onLogout()}
               className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold text-zinc-100 hover:bg-white/10"
             >
               로그아웃
