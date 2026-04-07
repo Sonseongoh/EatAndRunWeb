@@ -17,7 +17,7 @@ export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, isLoading, signOut } = useAuth();
-  const { locale, setLocale, t } = useLocale();
+  const { locale, t } = useLocale();
   const resetFlow = useFlowStore((state) => state.resetFlow);
 
   async function onLogout() {
@@ -60,26 +60,6 @@ export function TopNav() {
               </Link>
             );
           })}
-          <div className="ml-1 inline-flex overflow-hidden rounded-md border border-white/20">
-            <button
-              type="button"
-              onClick={() => setLocale("ko")}
-              className={`px-2 py-1.5 text-[11px] font-semibold sm:text-xs ${
-                locale === "ko" ? "bg-white/90 text-zinc-900" : "text-zinc-200 hover:bg-white/10"
-              }`}
-            >
-              KO
-            </button>
-            <button
-              type="button"
-              onClick={() => setLocale("en")}
-              className={`px-2 py-1.5 text-[11px] font-semibold sm:text-xs ${
-                locale === "en" ? "bg-white/90 text-zinc-900" : "text-zinc-200 hover:bg-white/10"
-              }`}
-            >
-              EN
-            </button>
-          </div>
           {!isLoading && !isAuthenticated ? (
             <Link
               href="/login"

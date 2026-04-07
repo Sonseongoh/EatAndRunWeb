@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { LocaleProvider } from "@/providers/locale-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { LocaleFab } from "./components/locale-fab";
 import { TopNav } from "./components/top-nav";
 
 export const metadata: Metadata = {
@@ -69,6 +70,7 @@ export default function RootLayout({
           <LocaleProvider>
             <AuthProvider>
               <TopNav />
+              <LocaleFab />
               {children}
             </AuthProvider>
           </LocaleProvider>
