@@ -31,6 +31,7 @@ export default function LoginPage() {
   const [isSent, setIsSent] = useState(false);
   const [isCopyDone, setIsCopyDone] = useState(false);
   const [isInApp, setIsInApp] = useState(false);
+  const [showInAppGuide, setShowInAppGuide] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -87,9 +88,11 @@ export default function LoginPage() {
 
     if (provider === "google" && isInApp) {
       setErrorMessage(inAppGuide);
+      setShowInAppGuide(true);
       return;
     }
 
+    setShowInAppGuide(false);
     setOauthPending(provider);
     try {
       await signInWithOAuth(provider);
@@ -109,7 +112,7 @@ export default function LoginPage() {
           Google 또는 이메일 매직링크로 로그인할 수 있습니다.
         </p>
 
-        {isInApp ? (
+        {isInApp && showInAppGuide ? (
           <div className="mt-4 rounded-lg border border-amber-300/30 bg-amber-400/10 p-3 text-sm text-amber-100">
             <p>{inAppGuide}</p>
             <div className="mt-2 flex flex-wrap gap-2">
