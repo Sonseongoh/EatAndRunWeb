@@ -42,3 +42,34 @@ create index if not exists idx_history_entries_food_name
 
 create index if not exists idx_history_entries_route_names_text
   on public.history_entries using gin (to_tsvector('simple', coalesce(route_names_text, '')));
+
+alter table public.history_entries enable row level security;
+
+drop policy if exists history_entries_select_own on public.history_entries;
+create policy history_entries_select_own
+  on public.history_entries
+  for select
+  to authenticated
+  using (auth.uid()::text = user_id);
+
+drop policy if exists history_entries_insert_own on public.history_entries;
+create policy history_entries_insert_own
+  on public.history_entries
+  for insert
+  to authenticated
+  with check (auth.uid()::text = user_id);
+
+drop policy if exists history_entries_update_own on public.history_entries;
+create policy history_entries_update_own
+  on public.history_entries
+  for update
+  to authenticated
+  using (auth.uid()::text = user_id)
+  with check (auth.uid()::text = user_id);
+
+drop policy if exists history_entries_delete_own on public.history_entries;
+create policy history_entries_delete_own
+  on public.history_entries
+  for delete
+  to authenticated
+  using (auth.uid()::text = user_id);

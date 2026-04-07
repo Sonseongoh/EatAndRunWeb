@@ -7,7 +7,7 @@ export function LocaleFab() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-6 right-6 z-50 pb-[env(safe-area-inset-bottom)] md:bottom-8 md:right-8"
       aria-label="Language selector"
     >
       <div className="inline-flex overflow-hidden rounded-full border border-white/20 bg-zinc-950/85 shadow-lg backdrop-blur-md">
@@ -33,4 +33,3 @@ export function LocaleFab() {
     </div>
   );
 }
-
