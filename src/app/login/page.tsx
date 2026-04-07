@@ -44,7 +44,7 @@ export default function LoginPage() {
 
   const inAppGuide = useMemo(
     () =>
-      "카카오톡 인앱브라우저에서는 Google 로그인(403 disallowed_useragent)이 차단될 수 있습니다. 우상단 메뉴에서 외부 브라우저로 열어 로그인해 주세요.",
+      "카카오 인앱브라우저에서는 Google 로그인이 제한됩니다. 메뉴(⋮/⋯/공유)에서 외부 브라우저로 열어주세요.",
     []
   );
 
