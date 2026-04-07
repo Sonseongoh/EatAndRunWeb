@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionButton } from "@/app/components/action-button";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -15,6 +15,12 @@ const OAUTH_LABELS: Record<OAuthProvider, string> = {
 
 const VISIBLE_OAUTH_PROVIDERS: VisibleOAuthProvider[] = ["google"];
 
+function isKakaoInAppBrowser() {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator.userAgent || "";
+  return /KAKAOTALK/i.test(ua);
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, signInWithOtp, signInWithOAuth } = useAuth();
@@ -23,6 +29,8 @@ export default function LoginPage() {
   const [oauthPending, setOauthPending] = useState<OAuthProvider | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSent, setIsSent] = useState(false);
+  const [isCopyDone, setIsCopyDone] = useState(false);
+  const [isInApp, setIsInApp] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -30,11 +38,21 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
+  useEffect(() => {
+    setIsInApp(isKakaoInAppBrowser());
+  }, []);
+
+  const inAppGuide = useMemo(
+    () =>
+      "카카오톡 인앱브라우저에서는 Google 로그인(403 disallowed_useragent)이 차단될 수 있습니다. 우상단 메뉴에서 외부 브라우저로 열어 로그인해 주세요.",
+    []
+  );
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = email.trim();
     if (!normalized) {
-      setErrorMessage("이메일을 입력해주세요.");
+      setErrorMessage("이메일을 입력해 주세요.");
       return;
     }
 
@@ -53,8 +71,25 @@ export default function LoginPage() {
     }
   }
 
+  async function copyCurrentUrl() {
+    if (typeof window === "undefined" || !window.navigator.clipboard) return;
+    try {
+      await window.navigator.clipboard.writeText(window.location.href);
+      setIsCopyDone(true);
+      setTimeout(() => setIsCopyDone(false), 2000);
+    } catch {
+      // no-op
+    }
+  }
+
   async function onOAuth(provider: OAuthProvider) {
     setErrorMessage("");
+
+    if (provider === "google" && isInApp) {
+      setErrorMessage(inAppGuide);
+      return;
+    }
+
     setOauthPending(provider);
     try {
       await signInWithOAuth(provider);
@@ -71,8 +106,24 @@ export default function LoginPage() {
       <section className="glass-card mx-auto w-full max-w-xl">
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">로그인</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          Google/Kakao 또는 이메일 링크로 로그인할 수 있습니다.
+          Google 또는 이메일 매직링크로 로그인할 수 있습니다.
         </p>
+
+        {isInApp ? (
+          <div className="mt-4 rounded-lg border border-amber-300/30 bg-amber-400/10 p-3 text-sm text-amber-100">
+            <p>{inAppGuide}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <ActionButton
+                onClick={() => void copyCurrentUrl()}
+                variant="ghost"
+                size="sm"
+                className="w-auto"
+              >
+                {isCopyDone ? "링크 복사됨" : "현재 링크 복사"}
+              </ActionButton>
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-2">
           {VISIBLE_OAUTH_PROVIDERS.map((provider) => (
