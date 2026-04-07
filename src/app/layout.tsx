@@ -8,7 +8,10 @@ import { TopNav } from "./components/top-nav";
 export const metadata: Metadata = {
   title: "Eat & Run | 먹은 만큼 똑똑하게 달리기",
   description:
-    "음식 사진 칼로리 분석부터 러닝 경로 추천까지 한 번에 연결하는 실행형 건강 루틴 서비스"
+    "음식 사진 칼로리 분석부터 러닝 경로 추천까지 한 번에 연결하는 실행형 건강 루틴 서비스",
+  other: {
+    "google-adsense-account": "ca-pub-9041574190753656"
+  }
 };
 
 export default function RootLayout({
@@ -30,6 +33,13 @@ export default function RootLayout({
           id="iconify-script"
           strategy="afterInteractive"
           src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"
+        />
+        <Script
+          id="google-adsense-script"
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9041574190753656"
+          crossOrigin="anonymous"
         />
         <QueryProvider>
           <AuthProvider>
