@@ -7,6 +7,7 @@ import { useFlowStore } from "@/store/use-flow-store";
 
 const menus = [
   { href: "/", label: "홈" },
+  { href: "/about", label: "서비스 소개" },
   { href: "/analyze", label: "시작하기" },
   { href: "/history", label: "기록" },
 ];

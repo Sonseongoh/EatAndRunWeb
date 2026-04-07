@@ -278,6 +278,24 @@ export function LandingPage() {
             <Link href="/history" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
               기록 보기
             </Link>
+            <Link href="/about" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
+              서비스 소개
+            </Link>
+            <Link href="/privacy" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
+              개인정보처리방침
+            </Link>
+            <Link href="/terms" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
+              이용약관
+            </Link>
+            <Link
+              href="/editorial-policy"
+              className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white"
+            >
+              운영 원칙
+            </Link>
+            <Link href="/contact" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
+              문의하기
+            </Link>
           </nav>
         </div>
       </footer>
