@@ -7,9 +7,9 @@ import { useFlowStore } from "@/store/use-flow-store";
 
 const menus = [
   { href: "/", label: "홈" },
-  { href: "/about", label: "서비스 소개" },
-  { href: "/analyze", label: "시작하기" },
-  { href: "/history", label: "기록" },
+  { href: "/about", label: "서비스 소개", mobileLabel: "소개" },
+  { href: "/analyze", label: "시작하기", mobileLabel: "시작" },
+  { href: "/history", label: "기록" }
 ];
 
 export function TopNav() {
@@ -29,11 +29,11 @@ export function TopNav() {
       <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-80"
+          className="whitespace-nowrap text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-80"
         >
-          Eat & Run
+          Eat &amp; Run
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {menus.map((menu) => {
             const active =
               menu.href === "/analyze"
@@ -43,20 +43,21 @@ export function TopNav() {
               <Link
                 key={menu.href}
                 href={menu.href}
-                className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
+                className={`whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-semibold sm:px-3 sm:text-sm ${
                   active
                     ? "bg-emerald-400 text-zinc-950"
                     : "text-zinc-200 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                {menu.label}
+                <span className="sm:hidden">{menu.mobileLabel ?? menu.label}</span>
+                <span className="hidden sm:inline">{menu.label}</span>
               </Link>
             );
           })}
           {!isLoading && !isAuthenticated ? (
             <Link
               href="/login"
-              className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold text-zinc-100 hover:bg-white/10"
+              className="whitespace-nowrap rounded-md border border-white/20 px-2 py-1.5 text-xs font-semibold text-zinc-100 hover:bg-white/10 sm:px-3 sm:text-sm"
             >
               로그인
             </Link>
@@ -65,7 +66,7 @@ export function TopNav() {
             <button
               type="button"
               onClick={() => void onLogout()}
-              className="rounded-md border border-white/20 px-3 py-1.5 text-sm font-semibold text-zinc-100 hover:bg-white/10"
+              className="whitespace-nowrap rounded-md border border-white/20 px-2 py-1.5 text-xs font-semibold text-zinc-100 hover:bg-white/10 sm:px-3 sm:text-sm"
             >
               로그아웃
             </button>
