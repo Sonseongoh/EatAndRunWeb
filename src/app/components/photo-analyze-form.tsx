@@ -6,9 +6,11 @@ import { ActionButton } from "@/app/components/action-button";
 import { FoodAnalysisResultCard } from "@/app/components/food-analysis-result-card";
 import { analyzeFoodImage } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
+import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 
 export function PhotoAnalyzeForm() {
+  const { t } = useLocale();
   const { setAnalysis, resetFlow } = useFlowStore();
   const [preview, setPreview] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -63,19 +65,19 @@ export function PhotoAnalyzeForm() {
         <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 p-2">
           {previewLoading && !previewError && (
             <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-sm text-zinc-400">
-              이미지 불러오는 중...
+              {t("이미지 불러오는 중...", "Loading image...")}
             </div>
           )}
           {previewError && (
             <div className="absolute inset-0 flex items-center justify-center bg-red-900/20 text-sm text-red-300">
-              이미지 미리보기를 불러오지 못했습니다.
+              {t("이미지 미리보기를 불러오지 못했습니다.", "Failed to load image preview.")}
             </div>
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="h-96 overflow-hidden rounded-lg md:h-[28rem]">
             <img
               src={preview}
-              alt="선택한 음식"
+              alt={t("선택한 음식", "Selected meal")}
               className="block h-full w-full object-fill bg-zinc-900"
               loading="eager"
               decoding="sync"
@@ -91,7 +93,7 @@ export function PhotoAnalyzeForm() {
             onClick={() => fileInputRef.current?.click()}
             className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
           >
-            사진 변경
+            {t("사진 변경", "Change photo")}
           </button>
           <p className="absolute bottom-3 left-3 rounded-md bg-black/45 px-2 py-1 text-xs text-white">
             {selectedFile?.name}
@@ -115,8 +117,10 @@ export function PhotoAnalyzeForm() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
             </svg>
           </div>
-          <p className="font-semibold text-zinc-100">사진 선택하기</p>
-          <p className="mt-1 text-xs text-zinc-400">클릭해서 음식 사진을 업로드해주세요</p>
+          <p className="font-semibold text-zinc-100">{t("사진 선택하기", "Select photo")}</p>
+          <p className="mt-1 text-xs text-zinc-400">
+            {t("클릭해서 음식 사진을 업로드해주세요", "Click to upload your meal photo")}
+          </p>
         </button>
       )}
 
@@ -127,7 +131,7 @@ export function PhotoAnalyzeForm() {
         size="sm"
         className="mx-auto mt-8 block disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
       >
-        {analyzeMutation.isPending ? "분석 중..." : "분석하기"}
+        {analyzeMutation.isPending ? t("분석 중...", "Analyzing...") : t("분석하기", "Analyze")}
       </ActionButton>
 
       {analyzeMutation.isError && (

@@ -3,14 +3,15 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ActionButton } from "@/app/components/action-button";
+import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 
 type OAuthProvider = "google" | "kakao";
 type VisibleOAuthProvider = "google";
 
-const OAUTH_LABELS: Record<OAuthProvider, string> = {
-  google: "Google로 로그인",
-  kakao: "Kakao로 로그인"
+const OAUTH_LABELS: Record<OAuthProvider, { ko: string; en: string }> = {
+  google: { ko: "Google로 로그인", en: "Continue with Google" },
+  kakao: { ko: "Kakao로 로그인", en: "Continue with Kakao" }
 };
 
 const VISIBLE_OAUTH_PROVIDERS: VisibleOAuthProvider[] = ["google"];
@@ -23,6 +24,7 @@ function isKakaoInAppBrowser() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const { isAuthenticated, isLoading, signInWithOtp, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [isPending, setIsPending] = useState(false);
@@ -45,15 +47,18 @@ export default function LoginPage() {
 
   const inAppGuide = useMemo(
     () =>
-      "카카오 인앱브라우저에서는 Google 로그인이 제한됩니다. 메뉴(⋮/⋯/공유)에서 외부 브라우저로 열어주세요.",
-    []
+      t(
+        "카카오 인앱브라우저에서는 Google 로그인이 제한됩니다. 메뉴(⋮/⋯/공유)에서 외부 브라우저로 열어주세요.",
+        "Google login is blocked in Kakao in-app browser. Open this page in an external browser from the menu (⋮/⋯/share)."
+      ),
+    [t]
   );
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = email.trim();
     if (!normalized) {
-      setErrorMessage("이메일을 입력해 주세요.");
+      setErrorMessage(t("이메일을 입력해 주세요.", "Please enter your email."));
       return;
     }
 
@@ -65,7 +70,7 @@ export default function LoginPage() {
       setIsSent(true);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "로그인 메일 전송에 실패했습니다.";
+        error instanceof Error ? error.message : t("로그인 메일 전송에 실패했습니다.", "Failed to send login email.");
       setErrorMessage(message);
     } finally {
       setIsPending(false);
@@ -98,7 +103,7 @@ export default function LoginPage() {
       await signInWithOAuth(provider);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "소셜 로그인에 실패했습니다.";
+        error instanceof Error ? error.message : t("소셜 로그인에 실패했습니다.", "Social login failed.");
       setErrorMessage(message);
       setOauthPending(null);
     }
@@ -107,9 +112,12 @@ export default function LoginPage() {
   return (
     <main className="app-shell md:px-8">
       <section className="glass-card mx-auto w-full max-w-xl">
-        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">로그인</h1>
+        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("로그인", "Login")}</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          Google 또는 이메일 매직링크로 로그인할 수 있습니다.
+          {t(
+            "Google 또는 이메일 매직링크로 로그인할 수 있습니다.",
+            "You can sign in with Google or email magic link."
+          )}
         </p>
 
         {isInApp && showInAppGuide ? (
@@ -122,7 +130,7 @@ export default function LoginPage() {
                 size="sm"
                 className="w-auto"
               >
-                {isCopyDone ? "링크 복사됨" : "현재 링크 복사"}
+                {isCopyDone ? t("링크 복사됨", "Link copied") : t("현재 링크 복사", "Copy current link")}
               </ActionButton>
             </div>
           </div>
@@ -138,7 +146,9 @@ export default function LoginPage() {
               className="w-full"
               disabled={Boolean(oauthPending)}
             >
-              {oauthPending === provider ? "연결 중..." : OAUTH_LABELS[provider]}
+              {oauthPending === provider
+                ? t("연결 중...", "Connecting...")
+                : t(OAUTH_LABELS[provider].ko, OAUTH_LABELS[provider].en)}
             </ActionButton>
           ))}
         </div>
@@ -161,13 +171,16 @@ export default function LoginPage() {
             className="w-full"
             disabled={isPending || Boolean(oauthPending)}
           >
-            {isPending ? "전송 중..." : "이메일 링크 보내기"}
+            {isPending ? t("전송 중...", "Sending...") : t("이메일 링크 보내기", "Send email link")}
           </ActionButton>
         </form>
 
         {isSent ? (
           <p className="mt-3 text-sm text-emerald-300">
-            로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요.
+            {t(
+              "로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요.",
+              "Login link sent. Please open your inbox and tap the link."
+            )}
           </p>
         ) : null}
         {errorMessage ? <p className="mt-3 text-sm text-red-300">{errorMessage}</p> : null}

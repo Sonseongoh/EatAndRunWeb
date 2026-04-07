@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { ActionButton } from "@/app/components/action-button";
-import { FoodAnalysisResponse } from "@/lib/types";
 import { calcAverageKcal } from "@/lib/running";
+import { FoodAnalysisResponse } from "@/lib/types";
+import { useLocale } from "@/providers/locale-provider";
 
 type FoodAnalysisResultCardProps = {
   analysis: FoodAnalysisResponse;
@@ -11,22 +12,27 @@ type FoodAnalysisResultCardProps = {
 
 export function FoodAnalysisResultCard({ analysis }: FoodAnalysisResultCardProps) {
   const router = useRouter();
+  const { t } = useLocale();
 
   return (
     <div className="glass-soft p-4 text-sm text-zinc-200">
-      <p className="font-semibold text-zinc-100">분석 결과</p>
-      <p className="mt-2">음식: {analysis.foodName}</p>
-      <p>
-        칼로리: {analysis.kcalMin} - {analysis.kcalMax} kcal
+      <p className="font-semibold text-zinc-100">{t("분석 결과", "Analysis result")}</p>
+      <p className="mt-2">
+        {t("음식", "Meal")}: {analysis.foodName}
       </p>
-      <p>평균 칼로리: {calcAverageKcal(analysis.kcalMin, analysis.kcalMax)} kcal</p>
+      <p>
+        {t("칼로리", "Calories")}: {analysis.kcalMin} - {analysis.kcalMax} kcal
+      </p>
+      <p>
+        {t("평균 칼로리", "Average calories")}: {calcAverageKcal(analysis.kcalMin, analysis.kcalMax)} kcal
+      </p>
       <ActionButton
         onClick={() => router.push("/activity")}
         variant="ghost"
         size="xs"
         className="mx-auto mt-3 block"
       >
-        다음 화면으로
+        {t("다음 화면으로", "Continue")}
       </ActionButton>
     </div>
   );

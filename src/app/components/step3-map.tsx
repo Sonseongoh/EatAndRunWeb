@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -8,6 +8,7 @@ import { ActionButton } from "@/app/components/action-button";
 import { getActivityLabel } from "@/lib/activity";
 import { recommendRunningRoutes, saveHistoryEntry } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
+import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
 
@@ -19,17 +20,10 @@ const DynamicGoogleRouteMap = dynamic(
 export function Step3Map() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const {
-    analysis,
-    mode,
-    durationMin,
-    routes,
-    selectedRouteIndex,
-    setSelectedRouteIndex,
-    setRoutes
-  } = useFlowStore();
-  const { setStart, burnRatioPercent, startLat, startLng, weightKg, paceMinPerKm } =
-    useRunProfileStore();
+  const { t, locale } = useLocale();
+  const { analysis, mode, durationMin, routes, selectedRouteIndex, setSelectedRouteIndex, setRoutes } =
+    useFlowStore();
+  const { setStart, burnRatioPercent, startLat, startLng, weightKg, paceMinPerKm } = useRunProfileStore();
   const [saveError, setSaveError] = useState("");
   const savedKeyRef = useRef<string>("");
   const routeRequestKeyRef = useRef<string>("");
@@ -46,15 +40,13 @@ export function Step3Map() {
       setSaveError(
         error instanceof Error
           ? error.message
-          : "기록 저장에 실패했습니다. 잠시 후 다시 시도해주세요."
+          : t("기록 저장에 실패했습니다. 잠시 후 다시 시도해주세요.", "Failed to save history. Please try again.")
       );
       savedKeyRef.current = "";
     }
   });
 
-  const targetBurnKcal = analysis
-    ? Math.max(1, Math.round((analysis.kcalAvg * burnRatioPercent) / 100))
-    : 0;
+  const targetBurnKcal = analysis ? Math.max(1, Math.round((analysis.kcalAvg * burnRatioPercent) / 100)) : 0;
 
   useEffect(() => {
     if (!analysis || !mode || !durationMin) router.replace("/");
@@ -64,16 +56,7 @@ export function Step3Map() {
     if (!analysis || !mode || !durationMin) return;
     if (routes.length > 0 || routeMutation.isPending) return;
 
-    const requestKey = [
-      analysis.foodName,
-      mode,
-      durationMin,
-      burnRatioPercent,
-      weightKg,
-      paceMinPerKm,
-      startLat,
-      startLng
-    ].join("|");
+    const requestKey = [analysis.foodName, mode, durationMin, burnRatioPercent, weightKg, paceMinPerKm, startLat, startLng].join("|");
     if (routeRequestKeyRef.current === requestKey) return;
     routeRequestKeyRef.current = requestKey;
 
@@ -81,12 +64,7 @@ export function Step3Map() {
       {
         startLat,
         startLng,
-        targetKcal: Math.max(
-          1,
-          Math.round(
-            (calcAverageKcal(analysis.kcalMin, analysis.kcalMax) * burnRatioPercent) / 100
-          )
-        ),
+        targetKcal: Math.max(1, Math.round((calcAverageKcal(analysis.kcalMin, analysis.kcalMax) * burnRatioPercent) / 100)),
         weightKg,
         paceMinPerKm,
         targetDurationMin: durationMin
@@ -98,26 +76,12 @@ export function Step3Map() {
         }
       }
     );
-  }, [
-    analysis,
-    burnRatioPercent,
-    durationMin,
-    mode,
-    paceMinPerKm,
-    routeMutation,
-    routes.length,
-    setRoutes,
-    startLat,
-    startLng,
-    targetBurnKcal,
-    weightKg
-  ]);
+  }, [analysis, burnRatioPercent, durationMin, mode, paceMinPerKm, routeMutation, routes.length, setRoutes, startLat, startLng, weightKg]);
 
   useEffect(() => {
     if (!routeMutation.isError) return;
-    const message =
-      routeMutation.error instanceof Error ? routeMutation.error.message : "";
-    if (message.includes("로그인")) {
+    const message = routeMutation.error instanceof Error ? routeMutation.error.message : "";
+    if (message.includes("로그인") || message.toLowerCase().includes("login")) {
       router.replace("/login");
     }
   }, [routeMutation.error, routeMutation.isError, router]);
@@ -154,18 +118,7 @@ export function Step3Map() {
       return;
     }
 
-    const saveKey = [
-      analysis.foodName,
-      analysis.kcalMin,
-      analysis.kcalMax,
-      mode,
-      durationMin,
-      burnRatioPercent,
-      targetBurnKcal,
-      weightKg,
-      paceMinPerKm,
-      selectedRoute.id
-    ].join("|");
+    const saveKey = [analysis.foodName, analysis.kcalMin, analysis.kcalMax, mode, durationMin, burnRatioPercent, targetBurnKcal, weightKg, paceMinPerKm, selectedRoute.id].join("|");
 
     if (savedKeyRef.current !== saveKey) {
       savedKeyRef.current = saveKey;
@@ -200,35 +153,31 @@ export function Step3Map() {
   return (
     <main className="app-shell md:px-8">
       <section className="glass-card">
-        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">3단계: 지도 확인</h1>
+        <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("3단계: 지도 확인", "Step 3: Map review")}</h1>
         <p className="mt-2 text-sm text-zinc-300">
-          현재 위치와 추천 경로를 지도에서 확인하세요.
+          {t("현재 위치와 추천 경로를 지도에서 확인하세요.", "Check your current position and recommended routes on the map.")}
         </p>
       </section>
 
       <section className="glass-card space-y-4">
         <div className="glass-soft p-4 text-sm text-zinc-200">
-          <p>목표 칼로리: {targetBurnKcal} kcal</p>
-          <p>설정 비율: {burnRatioPercent}%</p>
-          <p>선택한 방식: {getActivityLabel(mode)}</p>
+          <p>{t("목표 칼로리", "Target burn")}: {targetBurnKcal} kcal</p>
+          <p>{t("설정 비율", "Ratio")}: {burnRatioPercent}%</p>
+          <p>{t("선택한 방식", "Selected mode")}: {getActivityLabel(mode, locale)}</p>
           <p>
-            권장 시간: <span className="font-bold text-emerald-300">{durationMin}분</span>
+            {t("권장 시간", "Recommended time")}: <span className="font-bold text-emerald-300">{durationMin}{t("분", " min")}</span>
           </p>
         </div>
         {saveError && <p className="text-sm text-red-300">{saveError}</p>}
 
         {routeMutation.isPending && routes.length === 0 && (
-          <p className="text-sm text-zinc-400">경로를 불러오는 중입니다...</p>
+          <p className="text-sm text-zinc-400">{t("경로를 불러오는 중입니다...", "Loading routes...")}</p>
         )}
         {routeMutation.isError && routes.length === 0 && (
           <div className="space-y-2">
             <p className="text-sm text-red-300">{(routeMutation.error as Error).message}</p>
-            <ActionButton
-              onClick={onRetryRouteRecommend}
-              variant="ghost"
-              size="xs"
-            >
-              경로 다시 시도
+            <ActionButton onClick={onRetryRouteRecommend} variant="ghost" size="xs">
+              {t("경로 다시 시도", "Retry route")}
             </ActionButton>
           </div>
         )}
@@ -254,10 +203,10 @@ export function Step3Map() {
                     }`}
                   >
                     <p className="font-semibold">{route.name}</p>
-                    <p>거리 {route.distanceKm}km</p>
-                    <p>예상 {route.estimatedMinutes}분</p>
+                    <p>{t("거리", "Distance")} {route.distanceKm}km</p>
+                    <p>{t("예상", "ETA")} {route.estimatedMinutes}{t("분", " min")}</p>
                     <p>
-                      소모 {route.expectedBurnKcal}kcal ({burnPerKm.toFixed(1)} kcal/km)
+                      {t("소모", "Burn")} {route.expectedBurnKcal}kcal ({burnPerKm.toFixed(1)} kcal/km)
                     </p>
                   </button>
                 );
@@ -271,19 +220,11 @@ export function Step3Map() {
         )}
 
         <div className="flex flex-wrap justify-center gap-2">
-          <ActionButton
-            href="/activity"
-            variant="ghost"
-            size="xs"
-          >
-            이전 화면
+          <ActionButton href="/activity" variant="ghost" size="xs">
+            {t("이전 화면", "Back")}
           </ActionButton>
-          <ActionButton
-            onClick={onGetCurrentLocation}
-            variant="ghost"
-            size="xs"
-          >
-            현재 위치 다시 가져오기
+          <ActionButton onClick={onGetCurrentLocation} variant="ghost" size="xs">
+            {t("현재 위치 다시 가져오기", "Use current location")}
           </ActionButton>
           <ActionButton
             onClick={() => void onGoHistory()}
@@ -293,10 +234,11 @@ export function Step3Map() {
             icon={<span>→</span>}
             iconPosition="right"
           >
-            {saveMutation.isPending ? "저장 중..." : "기록 화면으로"}
+            {saveMutation.isPending ? t("저장 중...", "Saving...") : t("기록 화면으로", "Go to history")}
           </ActionButton>
         </div>
       </section>
     </main>
   );
 }
+

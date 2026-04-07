@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "@/providers/locale-provider";
+
 export type AnalyzeMethod = "photo" | "text";
 
 type AnalyzeMethodTabsProps = {
@@ -8,6 +10,8 @@ type AnalyzeMethodTabsProps = {
 };
 
 export function AnalyzeMethodTabs({ method, onChange }: AnalyzeMethodTabsProps) {
+  const { t } = useLocale();
+
   return (
     <div className="inline-flex rounded-xl border border-white/10 bg-zinc-900/60 p-1">
       <button
@@ -19,7 +23,7 @@ export function AnalyzeMethodTabs({ method, onChange }: AnalyzeMethodTabsProps) 
             : "text-zinc-300 hover:bg-white/5 hover:text-zinc-100"
         }`}
       >
-        사진 분석
+        {t("사진 분석", "Photo")}
       </button>
       <button
         type="button"
@@ -30,7 +34,7 @@ export function AnalyzeMethodTabs({ method, onChange }: AnalyzeMethodTabsProps) 
             : "text-zinc-300 hover:bg-white/5 hover:text-zinc-100"
         }`}
       >
-        텍스트 입력
+        {t("텍스트 입력", "Text")}
       </button>
     </div>
   );

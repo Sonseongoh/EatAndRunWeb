@@ -2,6 +2,7 @@
 import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
+import { LocaleProvider } from "@/providers/locale-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { TopNav } from "./components/top-nav";
 
@@ -65,10 +66,12 @@ export default function RootLayout({
           `}
         </Script>
         <QueryProvider>
-          <AuthProvider>
-            <TopNav />
-            {children}
-          </AuthProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              <TopNav />
+              {children}
+            </AuthProvider>
+          </LocaleProvider>
         </QueryProvider>
       </body>
     </html>

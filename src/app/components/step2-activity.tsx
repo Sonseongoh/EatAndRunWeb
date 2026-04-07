@@ -1,13 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ActionButton } from "@/app/components/action-button";
-import {
-  ActivityMode,
-  calculateDurationMinutes,
-  getActivityLabel,
-} from "@/lib/activity";
+import { ActivityMode, calculateDurationMinutes, getActivityLabel } from "@/lib/activity";
+import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
 
@@ -15,12 +12,10 @@ const options: ActivityMode[] = ["walk", "brisk", "run"];
 
 export function Step2Activity() {
   const router = useRouter();
+  const { t, locale } = useLocale();
   const { analysis, mode, setActivity, setRoutes } = useFlowStore();
-  const { weightKg, setWeightKg, burnRatioPercent, setBurnRatioPercent } =
-    useRunProfileStore();
-  const [selectedMode, setSelectedMode] = useState<ActivityMode>(
-    mode || "walk",
-  );
+  const { weightKg, setWeightKg, burnRatioPercent, setBurnRatioPercent } = useRunProfileStore();
+  const [selectedMode, setSelectedMode] = useState<ActivityMode>(mode || "walk");
 
   useEffect(() => {
     if (!analysis) router.replace("/");
@@ -40,7 +35,7 @@ export function Step2Activity() {
     return calculateDurationMinutes({
       targetKcal: targetBurnKcal,
       weightKg,
-      mode: selectedMode,
+      mode: selectedMode
     });
   }, [analysis, selectedMode, targetBurnKcal, weightKg]);
 
@@ -57,11 +52,13 @@ export function Step2Activity() {
     <main className="app-shell md:px-8">
       <section className="glass-card">
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
-          2단계: 운동 방식 선택
+          {t("2단계: 운동 방식 선택", "Step 2: Choose activity")}
         </h1>
         <p className="mt-2 text-sm text-zinc-300">
-          걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을
-          계산합니다.
+          {t(
+            "걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을 계산합니다.",
+            "Choose walk, brisk walk, or run to estimate required duration."
+          )}
         </p>
       </section>
 
@@ -69,21 +66,16 @@ export function Step2Activity() {
         <div className="glass-soft mt-6 p-6">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-zinc-200">
-              목표 소모 칼로리:{" "}
-              <span className="inline-block whitespace-nowrap font-semibold">
-                {targetBurnKcal} kcal
-              </span>
+              {t("목표 소모 칼로리", "Target burn")}:{" "}
+              <span className="inline-block whitespace-nowrap font-semibold">{targetBurnKcal} kcal</span>
             </p>
             <p className="text-xs text-zinc-400">
-              (섭취{" "}
-              <span className="whitespace-nowrap">{analysis.kcalAvg} kcal</span>
-              의 {burnRatioPercent}%)
+              ({t("섭취", "Intake")} <span className="whitespace-nowrap">{analysis.kcalAvg} kcal</span>{" "}
+              {t("의", "")} {burnRatioPercent}%)
             </p>
           </div>
           <div className="mt-3 flex items-center gap-3">
-            <span className="shrink-0 whitespace-nowrap text-xs text-zinc-400">
-              비율
-            </span>
+            <span className="shrink-0 whitespace-nowrap text-xs text-zinc-400">{t("비율", "Ratio")}</span>
             <input
               type="range"
               min={10}
@@ -110,9 +102,7 @@ export function Step2Activity() {
           </div>
         </div>
 
-        <label className="block text-sm font-medium text-zinc-200">
-          몸무게(kg)
-        </label>
+        <label className="block text-sm font-medium text-zinc-200">{t("몸무게(kg)", "Weight (kg)")}</label>
         <input
           type="number"
           min={35}
@@ -134,39 +124,30 @@ export function Step2Activity() {
                   : "border-white/20 bg-zinc-900/60 text-zinc-200"
               }`}
             >
-              {getActivityLabel(option)}
+              {getActivityLabel(option, locale)}
             </button>
           ))}
         </div>
 
         <div className="glass-soft p-6 text-sm text-zinc-200">
-          <p className="font-semibold text-zinc-100">계산 결과</p>
+          <p className="font-semibold text-zinc-100">{t("계산 결과", "Result")}</p>
           <p className="mt-1">
-            {getActivityLabel(selectedMode)} 기준{" "}
-            <span className="font-bold text-emerald-300">{durationMin}분</span>{" "}
-            운동하면 됩니다.
+            {getActivityLabel(selectedMode, locale)} {t("기준", "mode")},{" "}
+            <span className="font-bold text-emerald-300">{durationMin}{t("분", " min")}</span>{" "}
+            {t("운동하면 됩니다.", "of activity is recommended.")}
           </p>
         </div>
 
         <div className="mt-auto flex flex-wrap justify-center gap-4 pt-2">
-          <ActionButton
-            href="/analyze"
-            variant="ghost"
-            size="xs"
-          >
-            이전 화면
+          <ActionButton href="/analyze" variant="ghost" size="xs">
+            {t("이전 화면", "Back")}
           </ActionButton>
-          <ActionButton
-            onClick={onNext}
-            variant="primary"
-            size="xs"
-            icon={<span>→</span>}
-            iconPosition="right"
-          >
-            지도 화면으로
+          <ActionButton onClick={onNext} variant="primary" size="xs" icon={<span>→</span>} iconPosition="right">
+            {t("지도 화면으로", "Go to map")}
           </ActionButton>
         </div>
       </section>
     </main>
   );
 }
+

@@ -3,30 +3,43 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import type { CSSProperties } from "react";
+import { useLocale } from "@/providers/locale-provider";
 
 const featureCards = [
   {
-    title: "사진 한 장으로 칼로리 분석",
-    description:
+    titleKo: "사진 한 장으로 칼로리 분석",
+    titleEn: "Calorie estimate from one photo",
+    descriptionKo:
       "음식 사진을 올리면 AI가 음식 종류와 칼로리 범위를 바로 계산해 운동 계획까지 이어집니다.",
+    descriptionEn:
+      "Upload a meal photo and AI estimates food type and calorie range, then connects it to a running plan.",
     icon: "solar:camera-linear"
   },
   {
-    title: "소모 칼로리 맞춤 러닝",
-    description:
+    titleKo: "소모 칼로리 맞춤 러닝",
+    titleEn: "Personalized calorie-burning run",
+    descriptionKo:
       "분석된 칼로리를 기준으로 목표 소모량을 설정하고, 오늘 컨디션에 맞는 운동 강도를 추천합니다.",
+    descriptionEn:
+      "Set a target burn from analyzed calories and get recommended intensity for today's condition.",
     icon: "solar:running-round-linear"
   },
   {
-    title: "지도 기반 실제 경로 추천",
-    description:
+    titleKo: "지도 기반 실제 경로 추천",
+    titleEn: "Map-based practical routes",
+    descriptionKo:
       "출발지 주변 도로를 기반으로 거리와 예상 시간을 계산해 바로 뛸 수 있는 코스를 보여줍니다.",
+    descriptionEn:
+      "Calculates distance and ETA from nearby roads to suggest routes you can run right away.",
     icon: "solar:map-point-wave-linear"
   },
   {
-    title: "히스토리로 루틴 관리",
-    description:
+    titleKo: "히스토리로 루틴 관리",
+    titleEn: "Routine tracking with history",
+    descriptionKo:
       "분석 결과와 활동 기록이 누적되어 지난 주와 비교하며 루틴을 안정적으로 개선할 수 있습니다.",
+    descriptionEn:
+      "Accumulated meal and activity logs help you compare with last week and improve your routine.",
     icon: "solar:chart-square-linear"
   }
 ];
@@ -59,6 +72,8 @@ const featureCards = [
 // ];
 
 export function LandingPage() {
+  const { t, locale } = useLocale();
+
   useEffect(() => {
     const revealElements = document.querySelectorAll<HTMLElement>("[data-reveal]");
     revealElements.forEach((element) => element.classList.add("reveal-init"));
@@ -91,25 +106,28 @@ export function LandingPage() {
             <div className="break-keep-all" data-reveal>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
                 <iconify-icon icon="solar:bolt-circle-linear" />
-                Eat & Run 루틴 자동화
+                {t("Eat & Run 루틴 자동화", "Eat & Run Routine Automation")}
               </p>
               <h1 className="mt-6 break-keep-all text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
-                먹은 만큼,
+                {t("먹은 만큼,", "Based on what you ate,")}
                 <br />
-                가장 실행하기 쉬운 <span className="whitespace-nowrap">러닝으로</span>
+                {t("가장 실행하기 쉬운 ", "to the easiest actionable ")}<span className="whitespace-nowrap">{t("러닝으로", "run")}</span>
                 <span className="block bg-gradient-to-r from-emerald-300 to-amber-300 bg-clip-text text-transparent">
-                  오늘 바로 연결합니다
+                  {t("오늘 바로 연결합니다", "we connect it today")}
                 </span>
               </h1>
               <p className="mt-6 max-w-[65ch] break-keep-all text-base leading-relaxed text-zinc-300 md:text-lg">
-                음식 사진 업로드부터 칼로리 분석, 운동 강도 설정, 지도 기반 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.
+                {t(
+                  "음식 사진 업로드부터 칼로리 분석, 운동 강도 설정, 지도 기반 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.",
+                  "From meal photo upload to calorie analysis, intensity setting, and map route recommendation, everything is connected in one practical health routine flow."
+                )}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-4">
                 <Link
                   href="/analyze"
                   className="group inline-flex min-h-12 items-center gap-2 rounded-2xl bg-emerald-400 px-8 py-4 text-lg font-semibold text-zinc-950 transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-emerald-300 active:scale-[0.98]"
                 >
-                  무료로 시작하기
+                  {t("무료로 시작하기", "Start for free")}
                   <iconify-icon
                     icon="solar:arrow-right-linear"
                     className="transition-transform duration-300 group-hover:translate-x-1"
@@ -119,7 +137,7 @@ export function LandingPage() {
                   href="/history"
                   className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/20 px-6 py-4 text-base font-medium text-zinc-200 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-white/35 hover:bg-white/5 active:scale-[0.98]"
                 >
-                  사용자 기록 보기
+                  {t("사용자 기록 보기", "View history")}
                 </Link>
               </div>
             </div>
@@ -130,24 +148,24 @@ export function LandingPage() {
               <div className="rounded-3xl border border-white/15 bg-white/5 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
                 <div className="rounded-2xl border border-white/10 bg-zinc-900/80 p-5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-zinc-200">오늘 분석 결과</p>
+                    <p className="text-sm font-semibold text-zinc-200">{t("오늘 분석 결과", "Today's analysis")}</p>
                     <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
-                      3분 내 추천 완료
+                      {t("3분 내 추천 완료", "Recommended in under 3 min")}
                     </span>
                   </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <article className="rounded-xl border border-white/10 bg-white/5 p-4">
-                      <p className="text-xs text-zinc-400">음식 추정</p>
-                      <p className="mt-2 text-lg font-semibold text-white">닭가슴살 샐러드</p>
+                      <p className="text-xs text-zinc-400">{t("음식 추정", "Detected meal")}</p>
+                      <p className="mt-2 text-lg font-semibold text-white">{t("닭가슴살 샐러드", "Chicken salad")}</p>
                     </article>
                     <article className="rounded-xl border border-white/10 bg-white/5 p-4">
-                      <p className="text-xs text-zinc-400">칼로리 범위</p>
+                      <p className="text-xs text-zinc-400">{t("칼로리 범위", "Calorie range")}</p>
                       <p className="mt-2 text-lg font-semibold text-white">420-510 kcal</p>
                     </article>
                     <article className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 p-4 sm:col-span-2">
-                      <p className="text-xs text-emerald-100/80">추천 러닝 코스</p>
-                      <p className="mt-2 text-lg font-semibold text-emerald-100">한강공원 6.2km 루프 코스</p>
-                      <p className="mt-2 text-sm text-emerald-50/80">예상 소모 468 kcal · 약 42분</p>
+                      <p className="text-xs text-emerald-100/80">{t("추천 러닝 코스", "Recommended route")}</p>
+                      <p className="mt-2 text-lg font-semibold text-emerald-100">{t("한강공원 6.2km 루프 코스", "Han River Park 6.2km loop")}</p>
+                      <p className="mt-2 text-sm text-emerald-50/80">{t("예상 소모 468 kcal · 약 42분", "Estimated burn 468 kcal · about 42 min")}</p>
                     </article>
                   </div>
                 </div>
@@ -161,29 +179,36 @@ export function LandingPage() {
       <section id="features" className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="break-keep-all" data-reveal>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">핵심 기능</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">{t("핵심 기능", "Core features")}</p>
             <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
-              기록이 아니라,
+              {t("기록이 아니라,", "Not just logging,")}
               <br />
-              실행까지 닿는 설계
+              {t("실행까지 닿는 설계", "a flow to real action")}
             </h2>
             <p className="mt-5 max-w-[65ch] text-base leading-relaxed text-zinc-300 md:text-lg">
-              Eat & Run은 데이터만 쌓는 서비스가 아닙니다. 사용자가 지금 당장 움직일 수 있게 흐름을 줄이고 선택을 자동화했습니다.
+              {t(
+                "Eat & Run은 데이터만 쌓는 서비스가 아닙니다. 사용자가 지금 당장 움직일 수 있게 흐름을 줄이고 선택을 자동화했습니다.",
+                "Eat & Run is not just a data logger. We reduce friction and automate choices so users can act now."
+              )}
             </p>
           </div>
 
           <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-1 gap-4 sm:grid-cols-2" data-reveal>
             {featureCards.map((feature, index) => (
               <article
-                key={feature.title}
+                key={feature.titleKo}
                 className={`reveal-item rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-emerald-200/30 hover:bg-white/[0.07] ${
                   index === 0 ? "sm:col-span-2" : ""
                 }`}
                 style={{ ["--index" as string]: index } as CSSProperties}
               >
                 <iconify-icon icon={feature.icon} className="text-2xl text-emerald-200" />
-                <h3 className="mt-4 break-keep-all text-xl font-semibold text-white">{feature.title}</h3>
-                <p className="mt-3 break-keep-all text-sm leading-relaxed text-zinc-300">{feature.description}</p>
+                <h3 className="mt-4 break-keep-all text-xl font-semibold text-white">
+                  {locale === "ko" ? feature.titleKo : feature.titleEn}
+                </h3>
+                <p className="mt-3 break-keep-all text-sm leading-relaxed text-zinc-300">
+                  {locale === "ko" ? feature.descriptionKo : feature.descriptionEn}
+                </p>
               </article>
             ))}
           </div>
@@ -232,14 +257,17 @@ export function LandingPage() {
         <div className="rounded-3xl border border-emerald-200/20 bg-[linear-gradient(130deg,rgba(16,185,129,0.24),rgba(10,10,10,0.65)_62%)] p-8 backdrop-blur xl:p-12">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="break-keep-all">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">지금 시작하기</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">{t("지금 시작하기", "Start now")}</p>
               <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
-                오늘 먹은 한 끼,
+                {t("오늘 먹은 한 끼,", "Turn today's meal")}
                 <br />
-                오늘 끝낼 러닝 계획으로 바꿔보세요
+                {t("오늘 끝낼 러닝 계획으로 바꿔보세요", "into a run plan you can finish today")}
               </h2>
               <p className="mt-5 max-w-[65ch] text-base leading-relaxed text-emerald-50/90 md:text-lg">
-                업로드부터 추천까지 3분 이내. 계산은 서비스가 맡고, 사용자는 바로 뛰기만 하면 됩니다.
+                {t(
+                  "업로드부터 추천까지 3분 이내. 계산은 서비스가 맡고, 사용자는 바로 뛰기만 하면 됩니다.",
+                  "From upload to recommendation in under 3 minutes. We do the math, you just run."
+                )}
               </p>
             </div>
             <div className="flex flex-col gap-4 rounded-2xl border border-white/15 bg-zinc-950/45 p-6">
@@ -247,7 +275,7 @@ export function LandingPage() {
                 href="/analyze"
                 className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-semibold text-zinc-900 transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-zinc-100 active:scale-[0.98]"
               >
-                러닝 계획 생성하기
+                {t("러닝 계획 생성하기", "Create running plan")}
                 <iconify-icon
                   icon="solar:arrow-right-up-linear"
                   className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
@@ -257,9 +285,11 @@ export function LandingPage() {
                 href="/history"
                 className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/20 px-6 py-4 text-base font-medium text-zinc-100 transition-all duration-300 ease-out hover:scale-[1.02] hover:bg-white/10 active:scale-[0.98]"
               >
-                누적 기록 확인하기
+                {t("누적 기록 확인하기", "Check your history")}
               </Link>
-              <p className="text-center text-xs text-zinc-300">회원가입 없이 체험 가능 · 평균 3분 내 첫 코스 생성</p>
+              <p className="text-center text-xs text-zinc-300">
+                {t("회원가입 없이 체험 가능 · 평균 3분 내 첫 코스 생성", "Try without signup · first route in ~3 minutes")}
+              </p>
             </div>
           </div>
         </div>
@@ -269,32 +299,34 @@ export function LandingPage() {
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="break-keep-all">
             <p className="text-lg font-semibold text-white">Eat & Run</p>
-            <p className="mt-2 text-sm text-zinc-400">먹은 만큼 똑똑하게 달리는 실행형 건강 루틴 서비스</p>
+            <p className="mt-2 text-sm text-zinc-400">
+              {t("먹은 만큼 똑똑하게 달리는 실행형 건강 루틴 서비스", "Actionable health routine service that turns meals into smart running plans")}
+            </p>
           </div>
           <nav className="flex flex-wrap items-center gap-3 text-sm text-zinc-300">
             <Link href="/analyze" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              시작하기
+              {t("시작하기", "Start")}
             </Link>
             <Link href="/history" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              기록 보기
+              {t("기록 보기", "History")}
             </Link>
             <Link href="/about" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              서비스 소개
+              {t("서비스 소개", "About")}
             </Link>
             <Link href="/privacy" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              개인정보처리방침
+              {t("개인정보처리방침", "Privacy")}
             </Link>
             <Link href="/terms" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              이용약관
+              {t("이용약관", "Terms")}
             </Link>
             <Link
               href="/editorial-policy"
               className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white"
             >
-              운영 원칙
+              {t("운영 원칙", "Policy")}
             </Link>
             <Link href="/contact" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
-              문의하기
+              {t("문의하기", "Contact")}
             </Link>
           </nav>
         </div>

@@ -1,3 +1,5 @@
+import type { Locale } from "@/providers/locale-provider";
+
 export type ActivityMode = "walk" | "brisk" | "run";
 
 const METS: Record<ActivityMode, number> = {
@@ -6,7 +8,13 @@ const METS: Record<ActivityMode, number> = {
   run: 8.3
 };
 
-export function getActivityLabel(mode: ActivityMode) {
+export function getActivityLabel(mode: ActivityMode, locale: Locale = "ko") {
+  if (locale === "en") {
+    if (mode === "walk") return "Walk";
+    if (mode === "brisk") return "Brisk walk";
+    return "Run";
+  }
+
   if (mode === "walk") return "걷기";
   if (mode === "brisk") return "빠른걸음";
   return "달리기";
@@ -23,3 +31,4 @@ export function calculateDurationMinutes(params: {
   if (!Number.isFinite(kcalPerMinute) || kcalPerMinute <= 0) return 0;
   return Math.max(1, Math.round(targetKcal / kcalPerMinute));
 }
+

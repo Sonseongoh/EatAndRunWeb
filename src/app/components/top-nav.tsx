@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 
 const menus = [
-  { href: "/", label: "홈" },
-  { href: "/about", label: "서비스 소개", mobileLabel: "소개" },
-  { href: "/analyze", label: "시작하기", mobileLabel: "시작" },
-  { href: "/history", label: "기록" }
+  { href: "/", labelKo: "홈", labelEn: "Home" },
+  { href: "/about", labelKo: "서비스 소개", labelEn: "About", mobileLabelKo: "소개", mobileLabelEn: "About" },
+  { href: "/analyze", labelKo: "시작하기", labelEn: "Start", mobileLabelKo: "시작", mobileLabelEn: "Start" },
+  { href: "/history", labelKo: "기록", labelEn: "History" }
 ];
 
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, isLoading, signOut } = useAuth();
+  const { locale, setLocale, t } = useLocale();
   const resetFlow = useFlowStore((state) => state.resetFlow);
 
   async function onLogout() {
@@ -49,17 +51,41 @@ export function TopNav() {
                     : "text-zinc-200 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <span className="sm:hidden">{menu.mobileLabel ?? menu.label}</span>
-                <span className="hidden sm:inline">{menu.label}</span>
+                <span className="sm:hidden">
+                  {locale === "ko"
+                    ? menu.mobileLabelKo ?? menu.labelKo
+                    : menu.mobileLabelEn ?? menu.labelEn}
+                </span>
+                <span className="hidden sm:inline">{locale === "ko" ? menu.labelKo : menu.labelEn}</span>
               </Link>
             );
           })}
+          <div className="ml-1 inline-flex overflow-hidden rounded-md border border-white/20">
+            <button
+              type="button"
+              onClick={() => setLocale("ko")}
+              className={`px-2 py-1.5 text-[11px] font-semibold sm:text-xs ${
+                locale === "ko" ? "bg-white/90 text-zinc-900" : "text-zinc-200 hover:bg-white/10"
+              }`}
+            >
+              KO
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocale("en")}
+              className={`px-2 py-1.5 text-[11px] font-semibold sm:text-xs ${
+                locale === "en" ? "bg-white/90 text-zinc-900" : "text-zinc-200 hover:bg-white/10"
+              }`}
+            >
+              EN
+            </button>
+          </div>
           {!isLoading && !isAuthenticated ? (
             <Link
               href="/login"
               className="whitespace-nowrap rounded-md border border-white/20 px-2 py-1.5 text-xs font-semibold text-zinc-100 hover:bg-white/10 sm:px-3 sm:text-sm"
             >
-              로그인
+              {t("로그인", "Login")}
             </Link>
           ) : null}
           {!isLoading && isAuthenticated ? (
@@ -68,7 +94,7 @@ export function TopNav() {
               onClick={() => void onLogout()}
               className="whitespace-nowrap rounded-md border border-white/20 px-2 py-1.5 text-xs font-semibold text-zinc-100 hover:bg-white/10 sm:px-3 sm:text-sm"
             >
-              로그아웃
+              {t("로그아웃", "Log out")}
             </button>
           ) : null}
         </div>
