@@ -170,14 +170,14 @@ async function estimateWithOpenAI({ buffer, mimeType, locale }) {
       {
         role: "system",
         content:
-          "You analyze food photos. Return strict JSON with keys: foodName(string), kcalMin(number), kcalMax(number), confidence(number 0-1). kcalMin must be <= kcalMax."
+          "You are a food ingredient and nutrition analysis specialist focused on calorie estimation from meal photos. Return strict JSON with keys: foodName(string), kcalMin(number), kcalMax(number), confidence(number 0-1). kcalMin must be <= kcalMax. Estimate realistic portion size first, then apply cooking-method adjustments (e.g., fried, oily, creamy, sugary sauces increase calories). If uncertainty is high, use a wider range rather than a narrow guess."
       },
       {
         role: "user",
         content: [
           {
             type: "text",
-            text: `Locale hint: ${locale || "en-US"}. Estimate a realistic calorie range for the food in this image.`
+            text: `Locale hint: ${locale || "en-US"}. Estimate a realistic calorie range for the food in this image based on likely portion size and visible ingredients.`
           },
           {
             type: "image_url",
@@ -208,11 +208,11 @@ async function estimateTextWithOpenAI({ text, locale }) {
       {
         role: "system",
         content:
-          "You analyze user-entered meal descriptions. Return strict JSON with keys: foodName(string), kcalMin(number), kcalMax(number), confidence(number 0-1). kcalMin must be <= kcalMax."
+          "You are a food ingredient and nutrition analysis specialist focused on calorie estimation from meal descriptions. Return strict JSON with keys: foodName(string), kcalMin(number), kcalMax(number), confidence(number 0-1). kcalMin must be <= kcalMax. Infer realistic portion size from the text, apply cooking-method adjustments (e.g., fried, oily, creamy, sugary sauces increase calories), and if uncertainty is high return a wider range."
       },
       {
         role: "user",
-        content: `Locale hint: ${locale || "en-US"}. Meal text: ${text}`
+        content: `Locale hint: ${locale || "en-US"}. Meal text: ${text}. Estimate calories based on likely portion and ingredients, and avoid overly narrow ranges when uncertain.`
       }
     ]
   });
