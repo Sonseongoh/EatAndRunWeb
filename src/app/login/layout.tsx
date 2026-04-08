@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Step1Analyze } from "../components/step1-analyze";
 
 export const metadata: Metadata = {
   robots: {
@@ -8,6 +7,10 @@ export const metadata: Metadata = {
   }
 };
 
-export default function AnalyzePage() {
-  return <Step1Analyze />;
+export default function LoginLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return children;
 }
