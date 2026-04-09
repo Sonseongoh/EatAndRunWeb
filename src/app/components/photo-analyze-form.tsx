@@ -9,7 +9,11 @@ import { calcAverageKcal } from "@/lib/running";
 import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 
-export function PhotoAnalyzeForm() {
+type PhotoAnalyzeFormProps = {
+  onDirtyChange?: (dirty: boolean) => void;
+};
+
+export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
   const { t } = useLocale();
   const { setAnalysis, resetFlow } = useFlowStore();
   const [preview, setPreview] = useState<string>("");
@@ -40,6 +44,10 @@ export function PhotoAnalyzeForm() {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
+
+  useEffect(() => {
+    onDirtyChange?.(Boolean(selectedFile || analyzeMutation.data));
+  }, [analyzeMutation.data, onDirtyChange, selectedFile]);
 
   function onAnalyze() {
     if (!selectedFile) return;
@@ -135,11 +143,14 @@ export function PhotoAnalyzeForm() {
       </ActionButton>
 
       {analyzeMutation.isError && (
-        <p className="text-sm text-red-300">{(analyzeMutation.error as Error).message}</p>
+        <p className="mt-4 text-sm text-red-300">{(analyzeMutation.error as Error).message}</p>
       )}
 
-      {analyzeMutation.data && <FoodAnalysisResultCard analysis={analyzeMutation.data} />}
+      {analyzeMutation.data && (
+        <div className="mt-6">
+          <FoodAnalysisResultCard analysis={analyzeMutation.data} />
+        </div>
+      )}
     </>
   );
 }
-

@@ -15,9 +15,9 @@ export default async function AboutPage() {
   return (
     <main className="app-shell">
       <section className="glass-card space-y-6">
-        <header className="space-y-3">
+        <header className="space-y-3 text-center">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">{t("서비스 소개", "About Eat & Run")}</h1>
-          <p className="text-sm leading-relaxed text-zinc-300">
+          <p className="mx-auto max-w-4xl break-keep text-sm leading-relaxed text-zinc-300">
             {t(
               "Eat & Run은 음식 섭취 기록과 운동 실행 사이의 간극을 줄이기 위해 만들어졌습니다. 사용자는 사진 또는 텍스트로 식사를 기록하고, 시스템은 예상 칼로리를 기반으로 실행 가능한 러닝 코스를 제안합니다.",
               "Eat & Run is built to close the gap between meal tracking and real exercise. Users log meals with photo or text, and the system suggests practical running routes based on estimated calories."
@@ -44,7 +44,7 @@ export default async function AboutPage() {
           </p>
         </article>
 
-        <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex flex-wrap justify-center gap-3 text-sm">
           <Link href="/privacy" className="btn-ghost px-4 py-2">{t("개인정보처리방침", "Privacy Policy")}</Link>
           <Link href="/terms" className="btn-ghost px-4 py-2">{t("이용약관", "Terms of Service")}</Link>
           <Link href="/editorial-policy" className="btn-ghost px-4 py-2">{t("운영 원칙", "Editorial Policy")}</Link>
@@ -54,4 +54,3 @@ export default async function AboutPage() {
     </main>
   );
 }
-
