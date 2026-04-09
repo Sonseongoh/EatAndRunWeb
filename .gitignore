@@ -4,3 +4,4 @@ out
 *.log
 .env.local
 backend/.env
+.gstack/
