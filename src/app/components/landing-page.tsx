@@ -313,6 +313,9 @@ export function LandingPage() {
             <Link href="/about" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
               {t("서비스 소개", "About")}
             </Link>
+            <Link href="/faq" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
+              {t("자주 묻는 질문", "FAQ")}
+            </Link>
             <Link href="/privacy" className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-white">
               {t("개인정보처리방침", "Privacy")}
             </Link>
