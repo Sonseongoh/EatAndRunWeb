@@ -50,11 +50,11 @@ export function Step2Activity() {
 
   return (
     <main className="app-shell md:px-8">
-      <section className="glass-card">
+      <section className="glass-card text-center">
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
           {t("2단계: 운동 방식 선택", "Step 2: Choose activity")}
         </h1>
-        <p className="mt-2 text-sm text-zinc-300">
+        <p className="mx-auto mt-2 max-w-3xl break-keep text-sm text-zinc-300">
           {t(
             "걷기, 빠른걸음, 달리기 중 하나를 선택하면 소모에 필요한 시간을 계산합니다.",
             "Choose walk, brisk walk, or run to estimate required duration."
@@ -150,4 +150,3 @@ export function Step2Activity() {
     </main>
   );
 }
-

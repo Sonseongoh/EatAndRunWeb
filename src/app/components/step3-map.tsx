@@ -192,11 +192,11 @@ export function Step3Map() {
 
   return (
     <main className="app-shell md:px-8">
-      <section className="glass-card">
+      <section className="glass-card text-center">
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">
           {t("3단계: 지도 확인", "Step 3: Map review")}
         </h1>
-        <p className="mt-2 text-sm text-zinc-300">
+        <p className="mx-auto mt-2 max-w-3xl break-keep text-sm text-zinc-300">
           {t("현재 위치와 추천 경로를 지도에서 확인하세요.", "Check your current position and recommended routes on the map.")}
         </p>
       </section>
