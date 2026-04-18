@@ -7,10 +7,37 @@ import { QueryProvider } from "@/providers/query-provider";
 import { LocaleFab } from "./components/locale-fab";
 import { TopNav } from "./components/top-nav";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://eat-and-run-web.vercel.app";
+const siteTitle = "Eat & Run | 먹은 만큼 똑똑하게 달리기";
+const siteDescription =
+  "음식 사진 칼로리 분석부터 러닝 경로 추천까지 한 번에 연결하는 실행형 건강 루틴 서비스";
+const ogImage = {
+  url: "/og-image.png",
+  width: 1200,
+  height: 630,
+  alt: "Eat & Run - 먹은 만큼 똑똑하게 달리기"
+};
+
 export const metadata: Metadata = {
-  title: "Eat & Run | 먹은 만큼 똑똑하게 달리기",
-  description:
-    "음식 사진 칼로리 분석부터 러닝 경로 추천까지 한 번에 연결하는 실행형 건강 루틴 서비스",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    url: "/",
+    siteName: "Eat & Run",
+    images: [ogImage],
+    locale: "ko_KR",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: [ogImage]
+  },
   other: {
     "google-adsense-account": "ca-pub-9041574190753656"
   }
