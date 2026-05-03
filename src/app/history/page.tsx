@@ -103,14 +103,12 @@ export default function HistoryPage() {
   if (isAuthLoading) {
     return (
       <main className="app-shell md:px-8">
-        <section className="glass-card space-y-4 text-center">
-          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
-          <p className="mx-auto max-w-3xl text-sm leading-relaxed text-zinc-300">
-            {t(
-              "Eat & Run은 식사 분석 결과와 러닝 기록을 한 곳에서 비교할 수 있도록 히스토리 기능을 제공합니다. 로그인 상태를 확인한 뒤 기록 화면을 불러옵니다.",
-              "Eat & Run keeps meal analysis results and running records in one place. We are checking your sign-in status before loading the history view."
-            )}
-          </p>
+        <section className="glass-card flex min-h-[320px] flex-col items-center justify-center gap-5 text-center">
+          <div className="h-14 w-14 animate-spin rounded-full border-[3px] border-emerald-200/30 border-t-emerald-300" />
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
+            <p className="text-sm text-zinc-300">{t("불러오는 중입니다...", "Loading...")}</p>
+          </div>
         </section>
       </main>
     );
@@ -124,7 +122,7 @@ export default function HistoryPage() {
             <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
             <p className="mx-auto max-w-3xl text-sm leading-relaxed text-zinc-300">
               {t(
-                "히스토리에서는 식사 분석 결과, 선택한 운동 방식, 추천 경로와 누적 패턴을 날짜별로 확인할 수 있습니다.",
+                "히스토리에서는 음식 분석 결과, 선택한 운동 방식, 추천 경로와 전체 패턴을 날짜별로 다시 확인할 수 있습니다.",
                 "History lets you review meal analysis results, selected activity types, recommended routes, and overall patterns by date."
               )}
             </p>
@@ -141,7 +139,7 @@ export default function HistoryPage() {
               </p>
             </article>
             <article className="glass-soft space-y-2 p-4">
-              <p className="text-sm font-semibold text-white">{t("필터 검색", "Filter and search")}</p>
+              <p className="text-sm font-semibold text-white">{t("필터 및 검색", "Filter and search")}</p>
               <p className="text-sm leading-relaxed text-zinc-300">
                 {t(
                   "운동 방식, 기간, 키워드 기준으로 원하는 기록만 추려서 볼 수 있습니다.",
@@ -150,10 +148,10 @@ export default function HistoryPage() {
               </p>
             </article>
             <article className="glass-soft space-y-2 p-4">
-              <p className="text-sm font-semibold text-white">{t("경로 회고", "Route review")}</p>
+              <p className="text-sm font-semibold text-white">{t("경로 복기", "Route review")}</p>
               <p className="text-sm leading-relaxed text-zinc-300">
                 {t(
-                  "선택했던 러닝 경로와 예상 소모량을 다시 확인해 다음 계획의 기준으로 삼을 수 있습니다.",
+                  "이전에 선택한 러닝 경로와 예상 소모 칼로리를 다시 확인해 다음 계획의 기준으로 삼을 수 있습니다.",
                   "Review previously chosen routes and burn estimates to plan your next run."
                 )}
               </p>
@@ -208,7 +206,7 @@ export default function HistoryPage() {
     <main className="app-shell md:px-8">
       <section className="glass-card">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("운동 기록", "Activity history")}</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
           <div className="flex items-center gap-2">
             {showSeedButton && (
               <ActionButton
@@ -234,7 +232,7 @@ export default function HistoryPage() {
         </div>
         <p className="mt-2 text-sm text-zinc-300">
           {t(
-            "Supabase에 저장된 기록을 날짜별로 확인하고, 검색/운동 방식/기간 필터를 적용할 수 있습니다.",
+            "Supabase에 저장된 기록을 날짜별로 확인하고, 검색과 운동 방식/기간 필터를 적용할 수 있습니다.",
             "View Supabase history by date and use search/activity/date filters."
           )}
         </p>
