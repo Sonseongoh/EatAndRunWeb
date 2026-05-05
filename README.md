@@ -75,6 +75,6 @@ npm run build
 ## 배포
 
 - Vercel 배포 체크리스트: `docs/DEPLOY_VERCEL.md`
-- Render 무료 플랜 keep-alive: GitHub Actions `.github/workflows/render-keep-alive.yml`이 `12분`마다 Render 백엔드의 `/health`를 호출합니다.
+- Render 무료 플랜 keep-alive: GitHub Actions `.github/workflows/render-keep-alive.yml`이 `30분`마다 Render 백엔드의 `/health`를 호출합니다.
 - 필요한 GitHub Actions 시크릿: `RENDER_HEALTHCHECK_URL=https://eatandrunweb.onrender.com/health`
 
