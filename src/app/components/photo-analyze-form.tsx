@@ -13,6 +13,49 @@ type PhotoAnalyzeFormProps = {
   onDirtyChange?: (dirty: boolean) => void;
 };
 
+const MAX_UPLOAD_EDGE = 1024;
+const JPEG_QUALITY = 0.82;
+
+// 업로드 전 이미지를 긴 변 기준 1024px JPEG로 축소해 전송 용량을 줄인다.
+// (브라우저 → Vercel → Render → OpenAI 경로의 업로드/처리 시간을 단축)
+async function downscaleImage(file: File): Promise<File> {
+  if (typeof document === "undefined") return file;
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("decode failed"));
+      img.src = objectUrl;
+    });
+
+    const longest = Math.max(image.naturalWidth, image.naturalHeight);
+    if (!longest || longest <= MAX_UPLOAD_EDGE) return file;
+
+    const scale = MAX_UPLOAD_EDGE / longest;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(image.naturalWidth * scale);
+    canvas.height = Math.round(image.naturalHeight * scale);
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY),
+    );
+    if (!blob || blob.size >= file.size) return file;
+
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    return new File([blob], `${baseName}.jpg`, { type: "image/jpeg" });
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
   const { t } = useLocale();
   const { setAnalysis, resetFlow } = useFlowStore();
@@ -49,9 +92,10 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
     onDirtyChange?.(Boolean(selectedFile || analyzeMutation.data));
   }, [analyzeMutation.data, onDirtyChange, selectedFile]);
 
-  function onAnalyze() {
+  async function onAnalyze() {
     if (!selectedFile) return;
-    analyzeMutation.mutate(selectedFile, {
+    const optimized = await downscaleImage(selectedFile);
+    analyzeMutation.mutate(optimized, {
       onSuccess: (analysis) => {
         const kcalAvg = calcAverageKcal(analysis.kcalMin, analysis.kcalMax);
         setAnalysis({ ...analysis, kcalAvg });
