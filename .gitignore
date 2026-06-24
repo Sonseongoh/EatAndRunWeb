@@ -5,3 +5,4 @@ out
 .env.local
 backend/.env
 .gstack/
+*.tsbuildinfo

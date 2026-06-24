@@ -75,6 +75,11 @@ export function TextAnalyzeForm({ onDirtyChange }: TextAnalyzeFormProps) {
         disabled={!foodText.trim() || analyzeMutation.isPending}
         variant="primary"
         size="sm"
+        icon={
+          analyzeMutation.isPending ? (
+            <span className="block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : undefined
+        }
         className="mx-auto mt-8 block disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
       >
         {analyzeMutation.isPending

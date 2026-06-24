@@ -137,6 +137,11 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
         disabled={!selectedFile || analyzeMutation.isPending}
         variant="primary"
         size="sm"
+        icon={
+          analyzeMutation.isPending ? (
+            <span className="block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : undefined
+        }
         className="mx-auto mt-8 block disabled:cursor-not-allowed disabled:bg-zinc-500 disabled:text-zinc-300"
       >
         {analyzeMutation.isPending ? t("분석 중...", "Analyzing...") : t("분석하기", "Analyze")}
