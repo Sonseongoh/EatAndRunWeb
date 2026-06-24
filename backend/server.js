@@ -19,7 +19,10 @@ const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
+const openaiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS || 30000);
+const openai = openaiApiKey
+  ? new OpenAI({ apiKey: openaiApiKey, timeout: openaiTimeoutMs, maxRetries: 2 })
+  : null;
 const rateLimiters = createAnalyzeRateLimiters();
 
 app.use(

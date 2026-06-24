@@ -16,6 +16,7 @@ export function Step2Activity() {
   const { analysis, mode, setActivity, setRoutes } = useFlowStore();
   const { weightKg, setWeightKg, burnRatioPercent, setBurnRatioPercent } = useRunProfileStore();
   const [selectedMode, setSelectedMode] = useState<ActivityMode>(mode || "walk");
+  const [weightInput, setWeightInput] = useState(String(weightKg));
 
   useEffect(() => {
     if (!analysis) router.replace("/");
@@ -107,8 +108,23 @@ export function Step2Activity() {
           type="number"
           min={35}
           max={150}
-          value={weightKg}
-          onChange={(e) => setWeightKg(Number(e.target.value))}
+          value={weightInput}
+          onChange={(e) => {
+            const raw = e.target.value;
+            setWeightInput(raw);
+            const next = Number(raw);
+            // 입력 중에는 자유롭게 두되, 빈 값/0/NaN으로 저장돼 칼로리 계산이
+            // 깨지지 않도록 유효한 양수일 때만 스토어에 반영한다.
+            if (Number.isFinite(next) && next > 0) setWeightKg(next);
+          }}
+          onBlur={() => {
+            const next = Number(weightInput);
+            const clamped = Number.isFinite(next)
+              ? Math.min(150, Math.max(35, next))
+              : weightKg;
+            setWeightKg(clamped);
+            setWeightInput(String(clamped));
+          }}
           className="glass-input w-full rounded-lg px-3 py-2 text-sm"
         />
 

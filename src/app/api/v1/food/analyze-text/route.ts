@@ -64,12 +64,26 @@ export async function POST(req: NextRequest) {
   }
   headers["X-User-Id"] = access.userId;
 
-  const upstream = await fetch(textAnalyzeUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ text, locale }),
-    cache: "no-store"
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(textAnalyzeUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ text, locale }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(40000)
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        error: {
+          code: "ANALYSIS_TIMEOUT",
+          message: "분석 서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요."
+        }
+      },
+      { status: 504 }
+    );
+  }
 
   const payload = await upstream.json().catch(() => null);
 

@@ -95,7 +95,7 @@ async function getGoogleWalkingRoute(start: Point, destination: Point): Promise<
 
   const response = await fetch(
     `https://maps.googleapis.com/maps/api/directions/json?${params.toString()}`,
-    { cache: "no-store" }
+    { cache: "no-store", signal: AbortSignal.timeout(10000) }
   );
   if (!response.ok) throw new Error("Google Directions request failed.");
 
@@ -119,7 +119,7 @@ async function getGoogleWalkingRoute(start: Point, destination: Point): Promise<
 
 async function getOsrmWalkingRoute(start: Point, destination: Point): Promise<RouteResult> {
   const url = `https://router.project-osrm.org/route/v1/foot/${start.lng},${start.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(10000) });
   if (!response.ok) throw new Error("OSRM route provider request failed.");
 
   const data = await response.json();
