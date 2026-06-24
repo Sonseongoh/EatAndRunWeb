@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { ActionButton } from "@/app/components/action-button";
 import {
@@ -17,8 +18,14 @@ import { HistoryDeleteDialog } from "./history-delete-dialog";
 import { HistoryDetailModal } from "./history-detail-modal";
 import { HistoryFilters } from "./history-filters";
 import { HistoryList } from "./history-list";
-import { HistorySummaryCharts } from "./history-summary-charts";
 import { ConfirmAction, FilterMode } from "./history-view-types";
+
+// 차트는 기록이 있을 때만 렌더되므로 chart.js 번들을 지연 로드한다.
+// (빈 기록/첫 진입 시 무거운 차트 라이브러리 다운로드를 피함)
+const HistorySummaryCharts = dynamic(
+  () => import("./history-summary-charts").then((m) => m.HistorySummaryCharts),
+  { ssr: false }
+);
 
 const PAGE_SIZE = 24;
 

@@ -51,13 +51,8 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
-          <Script
-            id="google-map-script"
-            strategy="afterInteractive"
-            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-          />
-        ) : null}
+        {/* Google Maps JS는 /map 화면의 GoogleRouteMap(useJsApiLoader)에서만 로드한다.
+            전역 주입을 제거해 지도가 없는 페이지의 초기 로딩을 가볍게 유지. */}
         <Script
           id="iconify-script"
           strategy="afterInteractive"
