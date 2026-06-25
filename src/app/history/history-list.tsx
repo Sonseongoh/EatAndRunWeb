@@ -36,8 +36,20 @@ export function HistoryList({
               return (
                 <article
                   key={entry.id}
-                  className="glass-soft cursor-pointer border border-transparent p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-300/10 hover:shadow-[0_12px_28px_-16px_rgba(16,185,129,0.85)]"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t("기록 상세 보기", "View record detail")}
+                  className="glass-soft cursor-pointer border border-transparent p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-300/10 hover:shadow-[0_12px_28px_-16px_rgba(16,185,129,0.85)] focus:outline-none focus-visible:border-emerald-300/60 focus-visible:ring-2 focus-visible:ring-emerald-300/40"
                   onClick={() => onOpenDetail(entry)}
+                  onKeyDown={(event) => {
+                    // 카드 본체에 포커스가 있을 때만 동작. 내부 삭제 버튼에서 누른
+                    // Enter/Space가 상세 열기로 번지지 않도록 차단.
+                    if (event.target !== event.currentTarget) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onOpenDetail(entry);
+                    }
+                  }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1 text-sm text-zinc-200">
