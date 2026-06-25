@@ -28,6 +28,15 @@ const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// 운영 환경에서는 와일드카드(*)를 허용하지 않는다. 아무 사이트나 브라우저로
+// 백엔드를 호출하는 것을 막고, 명시한 도메인만 허용. 로컬 개발에서는 편의상 * 허용.
+const allowWildcardOrigin = corsOrigins.includes("*") && !isProduction;
+if (isProduction && corsOrigins.includes("*")) {
+  console.error(
+    "[SECURITY] 운영 환경에서 CORS_ORIGIN의 와일드카드(*)는 무시됩니다. 허용할 도메인을 명시하세요."
+  );
+}
+
 const openaiTimeoutMs = Number(process.env.OPENAI_TIMEOUT_MS || 30000);
 const openai = openaiApiKey
   ? new OpenAI({ apiKey: openaiApiKey, timeout: openaiTimeoutMs, maxRetries: 2 })
@@ -38,7 +47,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (corsOrigins.includes("*") || corsOrigins.includes(origin)) {
+      if (allowWildcardOrigin || corsOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
