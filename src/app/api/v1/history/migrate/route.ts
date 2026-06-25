@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
     .select("id");
 
   if (error) {
+    console.error("[history:migrate]", error);
     return NextResponse.json(
-      { error: { message: error.message || "기록 이관에 실패했습니다." } },
+      { error: { message: "기록 이관에 실패했습니다." } },
       { status: 500 }
     );
   }

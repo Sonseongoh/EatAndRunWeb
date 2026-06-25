@@ -4,7 +4,6 @@ import {
   createLoginRequiredResponse,
   resolveAccessContext
 } from "@/lib/auth-access";
-import { getErrorMessage } from "@/lib/error-message";
 import { fromHistoryDbRow, HistoryDbRow, toHistoryDbRow } from "@/lib/history-record";
 import { HistoryEntry } from "@/lib/types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -63,8 +62,12 @@ export async function GET(request: NextRequest) {
     applyAccessCookies(response, access);
     return response;
   } catch (error) {
-    const message = getErrorMessage(error, "기록 조회에 실패했습니다.");
-    return NextResponse.json({ error: { message } }, { status: 500 });
+    // 원본 에러는 서버 로그에만 남기고, 클라이언트엔 일반 안내만 전달(내부 정보 누출 방지).
+    console.error("[history:GET]", error);
+    return NextResponse.json(
+      { error: { message: "기록 조회에 실패했습니다." } },
+      { status: 500 }
+    );
   }
 }
 
@@ -91,8 +94,11 @@ export async function POST(request: NextRequest) {
     applyAccessCookies(response, access, { markTrialUsed: access.kind === "guest" });
     return response;
   } catch (error) {
-    const message = getErrorMessage(error, "기록 저장에 실패했습니다.");
-    return NextResponse.json({ error: { message } }, { status: 500 });
+    console.error("[history:POST]", error);
+    return NextResponse.json(
+      { error: { message: "기록 저장에 실패했습니다." } },
+      { status: 500 }
+    );
   }
 }
 
@@ -128,7 +134,10 @@ export async function DELETE(request: NextRequest) {
     applyAccessCookies(response, access);
     return response;
   } catch (error) {
-    const message = getErrorMessage(error, "기록 삭제에 실패했습니다.");
-    return NextResponse.json({ error: { message } }, { status: 500 });
+    console.error("[history:DELETE]", error);
+    return NextResponse.json(
+      { error: { message: "기록 삭제에 실패했습니다." } },
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getErrorMessage } from "@/lib/error-message";
 import { applyHistoryUserCookie, resolveHistoryUserId } from "@/lib/history-user";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { toHistoryDbRow } from "@/lib/history-record";
@@ -31,7 +30,10 @@ export async function POST(request: NextRequest) {
     applyHistoryUserCookie(response, userId, shouldSetCookie);
     return response;
   } catch (error) {
-    const message = getErrorMessage(error, "테스트 데이터 입력에 실패했습니다.");
-    return NextResponse.json({ error: { message } }, { status: 500 });
+    console.error("[history:seed]", error);
+    return NextResponse.json(
+      { error: { message: "테스트 데이터 입력에 실패했습니다." } },
+      { status: 500 }
+    );
   }
 }

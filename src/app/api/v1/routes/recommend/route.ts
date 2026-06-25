@@ -243,12 +243,13 @@ export async function POST(req: NextRequest) {
     applyAccessCookies(response, access);
     return response;
   } catch (error) {
+    // 외부 경로 제공자(Google/OSRM)의 원본 에러 메시지는 로그에만 남긴다.
+    console.error("[routes:recommend]", error);
     return NextResponse.json(
       {
         error: {
           code: "ROUTE_PROVIDER_FAILED",
-          message:
-            (error as Error).message || "Failed to generate routes from route provider."
+          message: "경로를 생성하지 못했습니다. 잠시 후 다시 시도해주세요."
         }
       },
       { status: 502 }
