@@ -10,6 +10,15 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const backendApiKey = process.env.BACKEND_API_KEY || "";
+const isProduction = process.env.NODE_ENV === "production";
+
+// 운영 환경에서 API 키가 비어 있으면 인증이 무력화되므로(누구나 호출 가능)
+// 시작 시 명확히 경고한다. 실제 차단은 validateApiKey에서 fail-closed로 처리.
+if (isProduction && !backendApiKey) {
+  console.error(
+    "[SECURITY] BACKEND_API_KEY가 설정되지 않았습니다. 운영 환경에서는 모든 분석 요청을 거부합니다."
+  );
+}
 const openaiApiKey = process.env.OPENAI_API_KEY || "";
 const openaiModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const allowMockFallback =
@@ -88,7 +97,19 @@ function parseAnalysisResult(raw) {
 }
 
 function validateApiKey(req, res) {
-  if (!backendApiKey) return true;
+  if (!backendApiKey) {
+    // fail-closed: 키가 없을 때 운영 환경에서는 거부, 로컬 개발에서만 통과.
+    if (isProduction) {
+      res.status(503).json({
+        error: {
+          code: "SERVER_MISCONFIGURED",
+          message: "service is temporarily unavailable"
+        }
+      });
+      return false;
+    }
+    return true;
+  }
   const authHeader = req.headers.authorization || "";
   const expected = `Bearer ${backendApiKey}`;
   if (authHeader !== expected) {
