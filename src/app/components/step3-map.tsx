@@ -21,6 +21,7 @@ export function Step3Map() {
   const { setStart, burnRatioPercent, startLat, startLng, weightKg, paceMinPerKm } =
     useRunProfileStore();
   const [saveError, setSaveError] = useState("");
+  const [locationError, setLocationError] = useState("");
   const savedKeyRef = useRef<string>("");
   const routeRequestKeyRef = useRef<string>("");
 
@@ -110,15 +111,48 @@ export function Step3Map() {
   }, [routeMutation.error, routeMutation.isError, router]);
 
   function onGetCurrentLocation() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setLocationError(
+        t(
+          "이 브라우저에서는 위치 기능을 사용할 수 없습니다.",
+          "Location is not available in this browser."
+        )
+      );
+      return;
+    }
+    setLocationError("");
     routeMutation.reset();
     routeRequestKeyRef.current = "";
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        setLocationError("");
         setStart(position.coords.latitude, position.coords.longitude);
         setRoutes([]);
       },
-      () => {},
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError(
+            t(
+              "위치 권한이 거부되었습니다. 브라우저 설정에서 위치 접근을 허용해주세요.",
+              "Location permission was denied. Please allow location access in your browser settings."
+            )
+          );
+        } else if (error.code === error.TIMEOUT) {
+          setLocationError(
+            t(
+              "위치를 가져오는 데 시간이 너무 오래 걸립니다. 다시 시도해주세요.",
+              "Getting your location timed out. Please try again."
+            )
+          );
+        } else {
+          setLocationError(
+            t(
+              "현재 위치를 가져오지 못했습니다. 다시 시도해주세요.",
+              "Failed to get your current location. Please try again."
+            )
+          );
+        }
+      },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }
@@ -225,6 +259,12 @@ export function Step3Map() {
           onRetry={onRetryRouteRecommend}
           onSelectRoute={setSelectedRouteIndex}
         />
+
+        {locationError && (
+          <p className="text-sm text-red-300" role="alert">
+            {locationError}
+          </p>
+        )}
 
         <Step3Actions
           isSaving={saveMutation.isPending}
