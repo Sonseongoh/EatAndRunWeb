@@ -178,49 +178,57 @@ export default function HistoryPage() {
             <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
             <p className="mx-auto max-w-3xl text-sm leading-relaxed text-zinc-300">
               {t(
-                "히스토리에서는 음식 분석 결과, 선택한 운동 방식, 추천 경로와 전체 패턴을 날짜별로 다시 확인할 수 있습니다.",
-                "History lets you review meal analysis results, selected activity types, recommended routes, and overall patterns by date."
+                "음식을 찍고 계획을 세우는 건 절반입니다. 로그인하면 그 계획을 실제로 했는지 추적하고, 매일의 연속 기록과 완수율로 이어갈 수 있습니다.",
+                "Snapping a meal and making a plan is only half. Sign in to track whether you actually did it, and keep it going with daily streaks and your completion rate."
               )}
             </p>
           </header>
 
           <div className="grid gap-3 md:grid-cols-3">
             <article className="glass-soft space-y-2 p-4">
-              <p className="text-sm font-semibold text-white">{t("기록 비교", "Compare records")}</p>
+              <p className="text-sm font-semibold text-white">🔥 {t("매일 연속 기록", "Daily streak")}</p>
               <p className="text-sm leading-relaxed text-zinc-300">
                 {t(
-                  "지난 식사와 운동 조합을 날짜별로 비교해 루틴 변화를 확인할 수 있습니다.",
-                  "Compare past meal and workout combinations by date to spot routine changes."
+                  "완수한 날이 이어질수록 연속 기록(streak)이 쌓입니다. 오늘도 끊지 마세요.",
+                  "Your streak grows with every day you complete. Don't break it today."
                 )}
               </p>
             </article>
             <article className="glass-soft space-y-2 p-4">
-              <p className="text-sm font-semibold text-white">{t("필터 및 검색", "Filter and search")}</p>
+              <p className="text-sm font-semibold text-white">✅ {t("완수 체크", "Mark it done")}</p>
               <p className="text-sm leading-relaxed text-zinc-300">
                 {t(
-                  "운동 방식, 기간, 키워드 기준으로 원하는 기록만 추려서 볼 수 있습니다.",
-                  "Filter the record list by activity type, date range, and keyword."
+                  "계획한 운동을 실제로 했으면 1탭으로 완료. 한 일과 못 한 일이 한눈에 정리됩니다.",
+                  "Did the workout? Mark it done in one tap. See at a glance what you did and didn't."
                 )}
               </p>
             </article>
             <article className="glass-soft space-y-2 p-4">
-              <p className="text-sm font-semibold text-white">{t("경로 복기", "Route review")}</p>
+              <p className="text-sm font-semibold text-white">📊 {t("완수율", "Completion rate")}</p>
               <p className="text-sm leading-relaxed text-zinc-300">
                 {t(
-                  "이전에 선택한 러닝 경로와 예상 소모 칼로리를 다시 확인해 다음 계획의 기준으로 삼을 수 있습니다.",
-                  "Review previously chosen routes and burn estimates to plan your next run."
+                  "결심한 계획 중 몇 %를 실제로 해냈는지. 측정해야 바뀝니다.",
+                  "What share of your plans you actually completed. You change what you measure."
                 )}
               </p>
             </article>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3">
-            <ActionButton href="/login" variant="primary" size="sm">
-              {t("로그인하고 기록 보기", "Sign in to view history")}
-            </ActionButton>
-            <ActionButton href="/faq" variant="ghost" size="sm">
-              {t("기능 안내 보기", "Learn how it works")}
-            </ActionButton>
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-wrap justify-center gap-3">
+              <ActionButton href="/login" variant="primary" size="sm">
+                {t("로그인하고 완수 추적 시작", "Sign in and start tracking")}
+              </ActionButton>
+              <ActionButton href="/faq" variant="ghost" size="sm">
+                {t("기능 안내 보기", "Learn how it works")}
+              </ActionButton>
+            </div>
+            <p className="text-xs text-zinc-400">
+              {t(
+                "지금까지 만든 기록도 로그인하면 그대로 이어집니다.",
+                "The records you've already made carry over when you sign in."
+              )}
+            </p>
           </div>
         </section>
       </main>
