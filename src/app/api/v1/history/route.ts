@@ -102,6 +102,43 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const access = await resolveAccessContext(request, { allowGuest: true });
+    if (access.kind === "denied") return createLoginRequiredResponse();
+
+    const supabase = createSupabaseServerClient();
+    const body = (await request.json()) as { id?: string; completed?: boolean };
+    const id = body.id;
+    if (!id || typeof body.completed !== "boolean") {
+      return NextResponse.json(
+        { error: { message: "id와 completed가 필요합니다." } },
+        { status: 400 }
+      );
+    }
+
+    const completedAt = body.completed ? new Date().toISOString() : null;
+    const { data, error } = await supabase
+      .from(TABLE)
+      .update({ completed_at: completedAt })
+      .eq("id", id)
+      .eq("user_id", access.userId)
+      .select("*")
+      .single();
+    if (error) throw error;
+
+    const response = NextResponse.json({ entry: fromHistoryDbRow(data as HistoryDbRow) });
+    applyAccessCookies(response, access);
+    return response;
+  } catch (error) {
+    console.error("[history:PATCH]", error);
+    return NextResponse.json(
+      { error: { message: "완료 상태 변경에 실패했습니다." } },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const access = await resolveAccessContext(request, { allowGuest: true });

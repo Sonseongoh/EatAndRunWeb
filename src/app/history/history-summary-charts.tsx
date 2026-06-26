@@ -33,8 +33,10 @@ export function HistorySummaryCharts({
   showTargetOverlay,
   onToggleTargetOverlay
 }: HistorySummaryChartsProps) {
-  const dailyBurnSeries = useMemo(() => buildDailyBurnSeries(entries), [entries]);
-  const modeDistribution = useMemo(() => buildModeDistribution(entries), [entries]);
+  // 통계는 실제로 완수한 계획만 집계한다(미완료·놓침 제외) — 누적 지표가 실제 활동을 정직하게 반영하도록.
+  const completedEntries = useMemo(() => entries.filter((entry) => Boolean(entry.completion)), [entries]);
+  const dailyBurnSeries = useMemo(() => buildDailyBurnSeries(completedEntries), [completedEntries]);
+  const modeDistribution = useMemo(() => buildModeDistribution(completedEntries), [completedEntries]);
 
   const burnLineData = useMemo(
     () => ({

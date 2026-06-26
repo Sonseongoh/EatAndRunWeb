@@ -2,6 +2,7 @@
 
 import { ActionButton } from "@/app/components/action-button";
 import { getActivityLabel } from "@/lib/activity";
+import { deriveCompletionState } from "@/lib/completion";
 import { HistoryEntry } from "@/lib/types";
 import { groupEntriesByDate } from "./history-utils";
 
@@ -11,6 +12,8 @@ type HistoryListProps = {
   t: (ko: string, en: string) => string;
   onOpenDetail: (entry: HistoryEntry) => void;
   onRequestDelete: (entry: HistoryEntry) => void;
+  onToggleComplete: (entry: HistoryEntry) => void;
+  togglingId?: string | null;
 };
 
 export function HistoryList({
@@ -18,9 +21,12 @@ export function HistoryList({
   locale,
   t,
   onOpenDetail,
-  onRequestDelete
+  onRequestDelete,
+  onToggleComplete,
+  togglingId
 }: HistoryListProps) {
   const grouped = groupEntriesByDate(entries);
+  const now = new Date();
 
   return (
     <>
@@ -33,6 +39,7 @@ export function HistoryList({
                 (sum, route) => sum + (route.expectedBurnKcal ?? 0),
                 0
               );
+              const state = deriveCompletionState(entry, now);
               return (
                 <article
                   key={entry.id}
@@ -53,8 +60,20 @@ export function HistoryList({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1 text-sm text-zinc-200">
-                      <p className="font-semibold text-zinc-100">
-                        {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
+                      <p className="flex items-center gap-2 font-semibold text-zinc-100">
+                        <span>
+                          {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
+                        </span>
+                        {state === "completed" && (
+                          <span className="rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2 py-0.5 text-xs font-medium text-emerald-200">
+                            {t("완료", "Done")}
+                          </span>
+                        )}
+                        {state === "missed" && (
+                          <span className="rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2 py-0.5 text-xs font-medium text-zinc-400">
+                            {t("놓침", "Missed")}
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-zinc-400">
                         {new Date(entry.createdAt).toLocaleTimeString()}
@@ -80,17 +99,34 @@ export function HistoryList({
                         {t("경로", "Routes")}: {entry.routes.map((route) => route.name).join(", ")}
                       </p>
                     </div>
-                    <ActionButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onRequestDelete(entry);
-                      }}
-                      variant="danger"
-                      size="xs"
-                      className="py-1.5"
-                    >
-                      {t("삭제", "Delete")}
-                    </ActionButton>
+                    <div className="flex shrink-0 flex-col gap-2">
+                      {/* 놓침(missed)은 당일 마감되어 완료 액션을 제공하지 않는다. */}
+                      {state !== "missed" && (
+                        <ActionButton
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleComplete(entry);
+                          }}
+                          disabled={togglingId === entry.id}
+                          variant={state === "completed" ? "ghost" : "primary"}
+                          size="xs"
+                          className="py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {state === "completed" ? t("완료 취소", "Undo") : t("했어요", "Mark done")}
+                        </ActionButton>
+                      )}
+                      <ActionButton
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRequestDelete(entry);
+                        }}
+                        variant="danger"
+                        size="xs"
+                        className="py-1.5"
+                      >
+                        {t("삭제", "Delete")}
+                      </ActionButton>
+                    </div>
                   </div>
                 </article>
               );

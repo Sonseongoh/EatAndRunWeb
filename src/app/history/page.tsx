@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { ActionButton } from "@/app/components/action-button";
@@ -9,8 +9,12 @@ import {
   clearHistoryEntries,
   deleteHistoryEntry,
   fetchHistoryEntries,
-  seedMockHistoryEntries
+  HistoryListResponse,
+  seedMockHistoryEntries,
+  setHistoryCompletion
 } from "@/lib/api";
+import { computeStreak, selectPendingToday } from "@/lib/completion";
+import { getErrorMessage } from "@/lib/error-message";
 import { HistoryEntry } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
 import { useLocale } from "@/providers/locale-provider";
@@ -18,6 +22,7 @@ import { HistoryDeleteDialog } from "./history-delete-dialog";
 import { HistoryDetailModal } from "./history-detail-modal";
 import { HistoryFilters } from "./history-filters";
 import { HistoryList } from "./history-list";
+import { HistoryTodayPending } from "./history-today-pending";
 import { ConfirmAction, FilterMode } from "./history-view-types";
 
 // 차트는 기록이 있을 때만 렌더되므로 chart.js 번들을 지연 로드한다.
@@ -43,6 +48,7 @@ export default function HistoryPage() {
   const [detailEntry, setDetailEntry] = useState<HistoryEntry | null>(null);
   const [detailRouteIndex, setDetailRouteIndex] = useState(0);
   const [showTargetOverlay, setShowTargetOverlay] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const historyQuery = useInfiniteQuery({
@@ -83,7 +89,48 @@ export default function HistoryPage() {
     }
   });
 
+  const completeMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      setHistoryCompletion(id, completed),
+    // 낙관적 업데이트: 토글을 즉시 반영하고, 실패하면 직전 캐시로 롤백한다.
+    onMutate: async ({ id, completed }) => {
+      setCompletionError(null);
+      await queryClient.cancelQueries({ queryKey: ["history"] });
+      const previous = queryClient.getQueriesData<InfiniteData<HistoryListResponse>>({
+        queryKey: ["history"]
+      });
+      const completedAt = new Date().toISOString();
+      queryClient.setQueriesData<InfiniteData<HistoryListResponse>>(
+        { queryKey: ["history"] },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              entries: page.entries.map((entry) =>
+                entry.id === id
+                  ? { ...entry, completion: completed ? { completedAt } : undefined }
+                  : entry
+              )
+            }))
+          };
+        }
+      );
+      return { previous };
+    },
+    onError: (error, _variables, context) => {
+      context?.previous?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      setCompletionError(getErrorMessage(error, "완료 상태 변경에 실패했습니다."));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+    }
+  });
+
   const entries = useMemo(() => data?.pages.flatMap((page) => page.entries) ?? [], [data]);
+  const pendingToday = useMemo(() => selectPendingToday(entries, new Date()), [entries]);
+  const streak = useMemo(() => computeStreak(entries, new Date()), [entries]);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -186,6 +233,10 @@ export default function HistoryPage() {
     setDetailRouteIndex(0);
   }
 
+  function toggleComplete(entry: HistoryEntry) {
+    completeMutation.mutate({ id: entry.id, completed: !entry.completion });
+  }
+
   function requestDelete(entry: HistoryEntry) {
     setConfirmAction({
       type: "delete-one",
@@ -213,7 +264,17 @@ export default function HistoryPage() {
     <main className="app-shell md:px-8">
       <section className="glass-card">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
+            {streak > 0 && (
+              <span
+                className="rounded-full border border-amber-300/60 bg-amber-300/15 px-3 py-1 text-sm font-semibold text-amber-200"
+                title={t("연속 완수 일수", "Completion streak")}
+              >
+                🔥 {t(`${streak}일 연속`, `${streak}-day streak`)}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {showSeedButton && (
               <ActionButton
@@ -244,6 +305,14 @@ export default function HistoryPage() {
           )}
         </p>
       </section>
+
+      <HistoryTodayPending
+        entries={pendingToday}
+        locale={locale}
+        t={t}
+        onComplete={toggleComplete}
+        togglingId={completeMutation.isPending ? completeMutation.variables?.id ?? null : null}
+      />
 
       <HistoryFilters
         keyword={keyword}
@@ -290,7 +359,21 @@ export default function HistoryPage() {
         </section>
       )}
 
-      <HistoryList entries={entries} locale={locale} t={t} onOpenDetail={openDetail} onRequestDelete={requestDelete} />
+      {completionError && (
+        <section className="rounded-2xl border border-red-300/60 bg-red-900/20 p-4 text-sm text-red-300">
+          {completionError}
+        </section>
+      )}
+
+      <HistoryList
+        entries={entries}
+        locale={locale}
+        t={t}
+        onOpenDetail={openDetail}
+        onRequestDelete={requestDelete}
+        onToggleComplete={toggleComplete}
+        togglingId={completeMutation.isPending ? completeMutation.variables?.id ?? null : null}
+      />
 
       {entries.length > 0 && (
         <div ref={loadMoreRef} className="py-2 text-center text-xs text-zinc-400">

@@ -21,6 +21,11 @@ create table if not exists public.history_entries (
 alter table public.history_entries
   add column if not exists user_id text;
 
+-- 완수(Completion): 사용자가 계획의 운동을 실제로 했다고 표시한 시각.
+-- 값이 있으면 완료, null이면 미완료(놓침은 저장하지 않고 읽는 시점에 파생).
+alter table public.history_entries
+  add column if not exists completed_at timestamptz null;
+
 update public.history_entries
 set user_id = 'legacy'
 where user_id is null;

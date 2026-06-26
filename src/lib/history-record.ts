@@ -16,6 +16,7 @@ export type HistoryDbRow = {
   route_names_text: string;
   analysis: HistoryEntry["analysis"];
   routes: HistoryEntry["routes"];
+  completed_at: string | null;
 };
 
 export function toHistoryDbRow(entry: HistoryEntry) {
@@ -32,7 +33,8 @@ export function toHistoryDbRow(entry: HistoryEntry) {
     start_lng: entry.profile.startLng,
     route_names_text: entry.routes.map((route) => route.name).join(", "),
     analysis: entry.analysis,
-    routes: entry.routes
+    routes: entry.routes,
+    completed_at: entry.completion?.completedAt ?? null
   };
 }
 
@@ -60,6 +62,7 @@ export function fromHistoryDbRow(row: HistoryDbRow): HistoryEntry {
       startLat: row.start_lat,
       startLng: row.start_lng
     },
-    routes: normalizeRoutes(row.routes)
+    routes: normalizeRoutes(row.routes),
+    completion: row.completed_at ? { completedAt: row.completed_at } : undefined
   };
 }

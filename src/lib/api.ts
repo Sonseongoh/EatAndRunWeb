@@ -154,6 +154,25 @@ export async function saveHistoryEntry(entry: HistoryEntry): Promise<HistoryEntr
   return payload.entry as HistoryEntry;
 }
 
+export async function setHistoryCompletion(
+  id: string,
+  completed: boolean
+): Promise<HistoryEntry> {
+  const response = await fetch("/api/v1/history", {
+    method: "PATCH",
+    headers: await getAuthHeaders("application/json"),
+    body: JSON.stringify({ id, completed })
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.error?.message ?? "완료 상태 변경에 실패했습니다.");
+  }
+
+  const payload = await response.json();
+  return payload.entry as HistoryEntry;
+}
+
 export async function deleteHistoryEntry(id: string): Promise<void> {
   const response = await fetch(`/api/v1/history?id=${encodeURIComponent(id)}`, {
     method: "DELETE",
