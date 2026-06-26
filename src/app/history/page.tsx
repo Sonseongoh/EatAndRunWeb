@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { ActionButton } from "@/app/components/action-button";
 import {
   clearHistoryEntries,
@@ -36,7 +35,6 @@ const HistorySummaryCharts = dynamic(
 const PAGE_SIZE = 24;
 
 export default function HistoryPage() {
-  const router = useRouter();
   const { t, locale } = useLocale();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const showSeedButton = process.env.NODE_ENV !== "production";
@@ -135,11 +133,6 @@ export default function HistoryPage() {
   const completionRate = useMemo(() => computeCompletionRate(entries, new Date()), [entries]);
 
   useEffect(() => {
-    if (isAuthLoading) return;
-    if (!isAuthenticated) router.replace("/login");
-  }, [isAuthLoading, isAuthenticated, router]);
-
-  useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
     const node = loadMoreRef.current;
     if (!node) return;
@@ -217,10 +210,10 @@ export default function HistoryPage() {
           <div className="flex flex-col items-center gap-2">
             <div className="flex flex-wrap justify-center gap-3">
               <ActionButton href="/login" variant="primary" size="sm">
-                {t("로그인하고 완수 추적 시작", "Sign in and start tracking")}
+                {t("로그인하고 시작", "Sign in to start")}
               </ActionButton>
               <ActionButton href="/faq" variant="ghost" size="sm">
-                {t("기능 안내 보기", "Learn how it works")}
+                {t("기능 안내", "How it works")}
               </ActionButton>
             </div>
             <p className="text-xs text-zinc-400">
