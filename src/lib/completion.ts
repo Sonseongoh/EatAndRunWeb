@@ -37,6 +37,26 @@ function kstDayKeyMinus(now: Date, n: number): string {
   return toKstDateKey(new Date(now.getTime() - n * DAY_MS));
 }
 
+export type CompletionRate = {
+  completed: number;
+  missed: number;
+  decided: number; // 결판난 계획 수 = 완수 + 놓침
+  rate: number | null; // 완수율 0..1. 결판난 계획이 없으면 null.
+};
+
+// 완수율: 완수 ÷ (완수 + 놓침). 오늘의 미완료(pending)는 아직 결판나지 않아 분모에서 제외.
+export function computeCompletionRate(entries: HistoryEntry[], now: Date): CompletionRate {
+  let completed = 0;
+  let missed = 0;
+  for (const entry of entries) {
+    const state = deriveCompletionState(entry, now);
+    if (state === "completed") completed += 1;
+    else if (state === "missed") missed += 1;
+  }
+  const decided = completed + missed;
+  return { completed, missed, decided, rate: decided === 0 ? null : completed / decided };
+}
+
 // 연속 기록(Streak): "그날 생성된 계획을 하나라도 완수한 날"의 연속 일수.
 // 오늘 완수했으면 오늘부터, 아직이면 어제부터(오늘 미완은 끊김이 아님) 거슬러 세고,
 // 완수가 없는 날을 만나면 멈춘다.

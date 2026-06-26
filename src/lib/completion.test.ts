@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { HistoryEntry } from "@/lib/types";
 import {
+  computeCompletionRate,
   computeStreak,
   deriveCompletionState,
   selectPendingToday,
@@ -81,6 +82,41 @@ describe("selectPendingToday", () => {
     const pastMissed = makeEntry({ createdAt: "2026-06-20T08:00:00+09:00" });
     expect(selectPendingToday([pastMissed], now)).toEqual([]);
     expect(selectPendingToday([], now)).toEqual([]);
+  });
+});
+
+describe("computeCompletionRate", () => {
+  const now = new Date("2026-06-26T10:00:00+09:00");
+
+  it("완수 ÷ (완수 + 놓침), 오늘의 미완료는 분모에서 제외한다", () => {
+    const entries = [
+      makeEntry({ id: "c1", createdAt: "2026-06-24T08:00:00+09:00", completion: { completedAt: "2026-06-24T09:00:00+09:00" } }),
+      makeEntry({ id: "c2", createdAt: "2026-06-23T08:00:00+09:00", completion: { completedAt: "2026-06-23T09:00:00+09:00" } }),
+      makeEntry({ id: "c3", createdAt: "2026-06-22T08:00:00+09:00", completion: { completedAt: "2026-06-22T09:00:00+09:00" } }),
+      makeEntry({ id: "m1", createdAt: "2026-06-21T08:00:00+09:00" }), // 놓침
+      makeEntry({ id: "p1", createdAt: "2026-06-26T08:00:00+09:00" }), // 오늘 미완료 → 제외
+      makeEntry({ id: "p2", createdAt: "2026-06-26T09:00:00+09:00" }) // 오늘 미완료 → 제외
+    ];
+    const result = computeCompletionRate(entries, now);
+    expect(result).toEqual({ completed: 3, missed: 1, decided: 4, rate: 0.75 });
+  });
+
+  it("결판난 계획이 없으면(전부 오늘 미완료 또는 빈 입력) rate는 null", () => {
+    expect(computeCompletionRate([], now).rate).toBeNull();
+    const onlyPending = makeEntry({ createdAt: "2026-06-26T08:00:00+09:00" });
+    expect(computeCompletionRate([onlyPending], now)).toEqual({
+      completed: 0,
+      missed: 0,
+      decided: 0,
+      rate: null
+    });
+  });
+
+  it("전부 완수면 rate 1, 전부 놓침이면 rate 0", () => {
+    const allDone = makeEntry({ createdAt: "2026-06-24T08:00:00+09:00", completion: { completedAt: "2026-06-24T09:00:00+09:00" } });
+    expect(computeCompletionRate([allDone], now).rate).toBe(1);
+    const allMissed = makeEntry({ createdAt: "2026-06-20T08:00:00+09:00" });
+    expect(computeCompletionRate([allMissed], now).rate).toBe(0);
   });
 });
 

@@ -13,7 +13,7 @@ import {
   seedMockHistoryEntries,
   setHistoryCompletion
 } from "@/lib/api";
-import { computeStreak, selectPendingToday } from "@/lib/completion";
+import { computeCompletionRate, computeStreak, selectPendingToday } from "@/lib/completion";
 import { getErrorMessage } from "@/lib/error-message";
 import { HistoryEntry } from "@/lib/types";
 import { useAuth } from "@/providers/auth-provider";
@@ -21,6 +21,7 @@ import { useLocale } from "@/providers/locale-provider";
 import { HistoryDeleteDialog } from "./history-delete-dialog";
 import { HistoryDetailModal } from "./history-detail-modal";
 import { HistoryFilters } from "./history-filters";
+import { HistoryCompletionRate } from "./history-completion-rate";
 import { HistoryList } from "./history-list";
 import { HistoryTodayPending } from "./history-today-pending";
 import { ConfirmAction, FilterMode } from "./history-view-types";
@@ -131,6 +132,7 @@ export default function HistoryPage() {
   const entries = useMemo(() => data?.pages.flatMap((page) => page.entries) ?? [], [data]);
   const pendingToday = useMemo(() => selectPendingToday(entries, new Date()), [entries]);
   const streak = useMemo(() => computeStreak(entries, new Date()), [entries]);
+  const completionRate = useMemo(() => computeCompletionRate(entries, new Date()), [entries]);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -330,6 +332,8 @@ export default function HistoryPage() {
           setEndDate("");
         }}
       />
+
+      {entries.length > 0 && <HistoryCompletionRate rate={completionRate} t={t} />}
 
       {entries.length > 0 && (
         <HistorySummaryCharts
