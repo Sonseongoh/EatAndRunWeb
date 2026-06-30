@@ -156,6 +156,33 @@ async function getRouteWithProvider(start: Point, destination: Point) {
   return { route, provider: "osrm" as const };
 }
 
+function randomBearing() {
+  return Math.random() * 360;
+}
+
+// 한 코스를 주어진 방향으로 생성하고, 도로가 없는 방향(강·막다른 길 등)으로 실패하면
+// 새 무작위 방향으로 최대 maxTries회 재시도한다.
+async function buildCourse(
+  start: Point,
+  oneWayStraightKm: number,
+  initialBearing: number,
+  maxTries: number
+) {
+  let bearing = initialBearing;
+  let lastError: unknown;
+  for (let attempt = 0; attempt < maxTries; attempt++) {
+    const destination = destinationPoint(start, oneWayStraightKm, bearing);
+    try {
+      const { route, provider } = await getRouteWithProvider(start, destination);
+      return { route, destination, provider };
+    } catch (error) {
+      lastError = error;
+      bearing = randomBearing();
+    }
+  }
+  throw lastError ?? new Error("Failed to build a route in any direction.");
+}
+
 function validateBody(body: RequestBody) {
   const valid =
     Number.isFinite(body.startLat) &&
@@ -195,59 +222,59 @@ export async function POST(req: NextRequest) {
   const burnPerKm = calcBurnPerKm(body.weightKg);
   const targetDistanceKm = Math.max(MIN_ROUTE_DISTANCE_KM, body.targetKcal / burnPerKm);
 
-  // 2코스는 "원하는 길을 고르는 다양성"이 목적 — 같은 목표 거리, 다른 방향(bearing).
-  // 거리·지형 차이를 암시하는 가짜 태그는 두지 않는다. 선택은 지도(경로 모양)로 한다.
-  const templates = [
-    { id: "course-a", name: "코스 A", ratio: 1, bearing: 35, tags: [] as string[] },
-    { id: "course-b", name: "코스 B", ratio: 1, bearing: 120, tags: [] as string[] }
+  // 왕복(out-and-back): 반환점은 직선 목표거리의 절반. 직선→도로 보정을 적용해
+  // 왕복 도로거리(편도×2)가 목표 거리에 가깝도록 직선 배치 거리를 미리 줄인다.
+  const oneWayStraightKm = Math.max(
+    MIN_ONE_WAY_DISTANCE_KM,
+    targetDistanceKm / 2 / ROAD_FACTOR
+  );
+
+  // 2코스는 "원하는 길을 고르는 다양성"이 목적. 매번 무작위 방향으로 뽑아 "갈 때마다 다른 코스"가
+  // 되게 하되, 두 방향은 서로 90~270° 벌려 겹치지 않게 한다. 선택은 지도(경로 모양)로 한다.
+  const bearingA = randomBearing();
+  const bearingB = (bearingA + 90 + Math.random() * 180) % 360;
+  const courseMeta = [
+    { id: "course-a", name: "코스 A", bearing: bearingA },
+    { id: "course-b", name: "코스 B", bearing: bearingB }
   ];
 
   let provider = googleApiKey ? "google-directions" : "osrm";
 
   try {
-    const routes = await Promise.all(
-      templates.map(async (template) => {
-        const targetKm = Number((targetDistanceKm * template.ratio).toFixed(1));
-        // 왕복(out-and-back): 목표 거리의 절반을 반환점으로 삼되, 직선→도로 보정을 적용해
-        // 왕복 도로거리(편도×2)가 목표 거리에 가깝도록 직선 배치 거리를 미리 줄인다.
-        const oneWayStraightKm = Math.max(
-          MIN_ONE_WAY_DISTANCE_KM,
-          targetKm / 2 / ROAD_FACTOR
-        );
-        const destination = destinationPoint(start, oneWayStraightKm, template.bearing);
-        const { route, provider: pickedProvider } = await getRouteWithProvider(
-          start,
-          destination
-        );
-
-        if (pickedProvider === "osrm-fallback") provider = "osrm-fallback";
-        if (pickedProvider === "google-directions") provider = "google-directions";
-        if (pickedProvider === "osrm" && provider !== "google-directions") provider = "osrm";
-
-        // 표시 거리·칼로리·시간은 왕복(편도 도로거리 × 2) 기준으로 통일.
-        const roundTripDistanceKm = Number((route.distanceKm * 2).toFixed(1));
-        const expectedBurnKcal = Math.round(roundTripDistanceKm * burnPerKm);
-        const paceBasedMinutes = Number.isFinite(body.paceMinPerKm)
-          ? Math.ceil(roundTripDistanceKm * body.paceMinPerKm)
-          : 0;
-        const estimatedMinutes = Math.max(1, paceBasedMinutes || route.durationMin * 2);
-        // 길 안내도 왕복: 출발지 → 반환점(waypoint) → 출발지.
-        const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${start.lat},${start.lng}&destination=${start.lat},${start.lng}&waypoints=${destination.lat},${destination.lng}&travelmode=walking`;
-
-        return {
-          id: template.id,
-          name: template.name,
-          distanceKm: roundTripDistanceKm,
-          estimatedMinutes,
-          expectedBurnKcal,
-          mapUrl,
-          start,
-          destination,
-          path: route.path,
-          tags: template.tags
-        };
-      })
+    const built = await Promise.all(
+      courseMeta.map((meta) => buildCourse(start, oneWayStraightKm, meta.bearing, 4))
     );
+
+    const routes = built.map(({ route, destination, provider: pickedProvider }, index) => {
+      const meta = courseMeta[index];
+
+      if (pickedProvider === "osrm-fallback") provider = "osrm-fallback";
+      if (pickedProvider === "google-directions") provider = "google-directions";
+      if (pickedProvider === "osrm" && provider !== "google-directions") provider = "osrm";
+
+      // 표시 거리·칼로리·시간은 왕복(편도 도로거리 × 2) 기준으로 통일.
+      const roundTripDistanceKm = Number((route.distanceKm * 2).toFixed(1));
+      const expectedBurnKcal = Math.round(roundTripDistanceKm * burnPerKm);
+      const paceBasedMinutes = Number.isFinite(body.paceMinPerKm)
+        ? Math.ceil(roundTripDistanceKm * body.paceMinPerKm)
+        : 0;
+      const estimatedMinutes = Math.max(1, paceBasedMinutes || route.durationMin * 2);
+      // 길 안내도 왕복: 출발지 → 반환점(waypoint) → 출발지.
+      const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${start.lat},${start.lng}&destination=${start.lat},${start.lng}&waypoints=${destination.lat},${destination.lng}&travelmode=walking`;
+
+      return {
+        id: meta.id,
+        name: meta.name,
+        distanceKm: roundTripDistanceKm,
+        estimatedMinutes,
+        expectedBurnKcal,
+        mapUrl,
+        start,
+        destination,
+        path: route.path,
+        tags: [] as string[]
+      };
+    });
 
     const response = NextResponse.json(
       { routes, provider, generatedAt: new Date().toISOString() },
