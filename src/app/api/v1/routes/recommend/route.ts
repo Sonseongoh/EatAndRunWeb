@@ -26,6 +26,9 @@ type RouteResult = {
 const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
 const MIN_ROUTE_DISTANCE_KM = 0.2;
 const MIN_ONE_WAY_DISTANCE_KM = 0.12;
+// 직선거리 → 실제 도로거리 보정 계수(휴리스틱). 도보 경로는 직선보다 보통 ~1.3배 길다.
+// 반환점을 직선으로 찍을 때 이 값으로 미리 줄여, 왕복 도로거리가 목표에 가깝게 한다.
+const ROAD_FACTOR = 1.3;
 
 function destinationPoint(start: Point, distanceKm: number, bearingDeg: number) {
   const R = 6371;
@@ -203,8 +206,13 @@ export async function POST(req: NextRequest) {
     const routes = await Promise.all(
       templates.map(async (template) => {
         const targetKm = Number((targetDistanceKm * template.ratio).toFixed(1));
-        const oneWayKm = Math.max(MIN_ONE_WAY_DISTANCE_KM, targetKm / 2);
-        const destination = destinationPoint(start, oneWayKm, template.bearing);
+        // 왕복(out-and-back): 목표 거리의 절반을 반환점으로 삼되, 직선→도로 보정을 적용해
+        // 왕복 도로거리(편도×2)가 목표 거리에 가깝도록 직선 배치 거리를 미리 줄인다.
+        const oneWayStraightKm = Math.max(
+          MIN_ONE_WAY_DISTANCE_KM,
+          targetKm / 2 / ROAD_FACTOR
+        );
+        const destination = destinationPoint(start, oneWayStraightKm, template.bearing);
         const { route, provider: pickedProvider } = await getRouteWithProvider(
           start,
           destination
@@ -214,17 +222,20 @@ export async function POST(req: NextRequest) {
         if (pickedProvider === "google-directions") provider = "google-directions";
         if (pickedProvider === "osrm" && provider !== "google-directions") provider = "osrm";
 
-        const expectedBurnKcal = Math.round(route.distanceKm * burnPerKm);
+        // 표시 거리·칼로리·시간은 왕복(편도 도로거리 × 2) 기준으로 통일.
+        const roundTripDistanceKm = Number((route.distanceKm * 2).toFixed(1));
+        const expectedBurnKcal = Math.round(roundTripDistanceKm * burnPerKm);
         const paceBasedMinutes = Number.isFinite(body.paceMinPerKm)
-          ? Math.ceil(route.distanceKm * body.paceMinPerKm)
+          ? Math.ceil(roundTripDistanceKm * body.paceMinPerKm)
           : 0;
-        const estimatedMinutes = Math.max(1, paceBasedMinutes || route.durationMin);
-        const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${start.lat},${start.lng}&destination=${destination.lat},${destination.lng}&travelmode=walking`;
+        const estimatedMinutes = Math.max(1, paceBasedMinutes || route.durationMin * 2);
+        // 길 안내도 왕복: 출발지 → 반환점(waypoint) → 출발지.
+        const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${start.lat},${start.lng}&destination=${start.lat},${start.lng}&waypoints=${destination.lat},${destination.lng}&travelmode=walking`;
 
         return {
           id: template.id,
           name: template.name,
-          distanceKm: route.distanceKm,
+          distanceKm: roundTripDistanceKm,
           estimatedMinutes,
           expectedBurnKcal,
           mapUrl,

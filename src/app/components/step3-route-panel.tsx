@@ -70,7 +70,7 @@ export function Step3RoutePanel({
                 >
                   <p className="font-semibold">{route.name}</p>
                   <p>
-                    {t("거리", "Distance")} {route.distanceKm}km
+                    {t("왕복 거리", "Round trip")} {route.distanceKm}km
                   </p>
                   <p>
                     {t("예상", "ETA")} {route.estimatedMinutes}
