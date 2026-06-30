@@ -19,7 +19,8 @@ export const useRunProfileStore = create<RunProfileState>()(
   persist(
     (set) => ({
       weightKg: 65,
-      paceMinPerKm: 6.5,
+      // 달리기 기본 페이스 7.1분/km ≈ 8.4km/h. activity.ts의 run MET(9, ≈8.4km/h)와 일치시켜 둔다.
+      paceMinPerKm: 7.1,
       burnRatioPercent: 30,
       startLat: 37.5519,
       startLng: 126.9918,
