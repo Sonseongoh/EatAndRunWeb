@@ -1,10 +1,12 @@
-﻿import type { Metadata } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { LocaleProvider } from "@/providers/locale-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { InstallPrompt } from "./components/install-prompt";
 import { LocaleFab } from "./components/locale-fab";
+import { PwaRegister } from "./components/pwa-register";
 import { TopNav } from "./components/top-nav";
 
 const siteUrl =
@@ -41,6 +43,10 @@ export const metadata: Metadata = {
   other: {
     "google-adsense-account": "ca-pub-9041574190753656"
   }
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a"
 };
 
 export default function RootLayout({
@@ -87,6 +93,8 @@ export default function RootLayout({
               <TopNav />
               <LocaleFab />
               {children}
+              <InstallPrompt />
+              <PwaRegister />
             </AuthProvider>
           </LocaleProvider>
         </QueryProvider>
