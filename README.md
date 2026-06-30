@@ -41,7 +41,21 @@
 
 ![게스트 전환 화면](./docs/screenshots/guest-history.png)
 
-> 로그인 후 완수 루프 화면(완수 토글 · 오늘의 미완료 직면 · 연속 기록 · 완수율 카드)은 [라이브 데모](https://eat-and-run-web.vercel.app)에서 확인할 수 있습니다.
+**로그인 후 — 완수 루프**
+
+연속 기록(🔥) · 오늘의 미완료 직면:
+
+![연속 기록과 오늘의 미완료 직면](./docs/screenshots/completion-top.png)
+
+완수/놓침 배지와 1탭 토글:
+
+![완수/놓침 배지와 토글](./docs/screenshots/completion-list.png)
+
+요약 차트 — *완수된 계획만* 집계:
+
+![기록 요약 차트](./docs/screenshots/summary-charts.png)
+
+> 라이브 데모: <https://eat-and-run-web.vercel.app>
 
 ## 핵심 기능
 
