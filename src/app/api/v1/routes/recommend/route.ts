@@ -195,9 +195,11 @@ export async function POST(req: NextRequest) {
   const burnPerKm = calcBurnPerKm(body.weightKg);
   const targetDistanceKm = Math.max(MIN_ROUTE_DISTANCE_KM, body.targetKcal / burnPerKm);
 
+  // 2코스는 "원하는 길을 고르는 다양성"이 목적 — 같은 목표 거리, 다른 방향(bearing).
+  // 거리·지형 차이를 암시하는 가짜 태그는 두지 않는다. 선택은 지도(경로 모양)로 한다.
   const templates = [
-    { id: "course-a", name: "코스 A", ratio: 0.85, bearing: 35, tags: ["짧은 거리", "완만"] },
-    { id: "course-b", name: "코스 B", ratio: 1, bearing: 120, tags: ["기본 거리", "균형"] }
+    { id: "course-a", name: "코스 A", ratio: 1, bearing: 35, tags: [] as string[] },
+    { id: "course-b", name: "코스 B", ratio: 1, bearing: 120, tags: [] as string[] }
   ];
 
   let provider = googleApiKey ? "google-directions" : "osrm";
