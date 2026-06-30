@@ -268,8 +268,10 @@ export function Step3Map() {
 
         <Step3Actions
           isSaving={saveMutation.isPending}
+          isRecommending={routeMutation.isPending}
           t={t}
           onGetCurrentLocation={onGetCurrentLocation}
+          onRetryRoutes={onRetryRouteRecommend}
           onGoHistory={() => void onGoHistory()}
         />
       </section>

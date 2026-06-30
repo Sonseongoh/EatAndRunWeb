@@ -4,15 +4,19 @@ import { ActionButton } from "@/app/components/action-button";
 
 type Step3ActionsProps = {
   isSaving: boolean;
+  isRecommending: boolean;
   t: (ko: string, en: string) => string;
   onGetCurrentLocation: () => void;
+  onRetryRoutes: () => void;
   onGoHistory: () => void;
 };
 
 export function Step3Actions({
   isSaving,
+  isRecommending,
   t,
   onGetCurrentLocation,
+  onRetryRoutes,
   onGoHistory
 }: Step3ActionsProps) {
   return (
@@ -22,6 +26,15 @@ export function Step3Actions({
       </ActionButton>
       <ActionButton onClick={onGetCurrentLocation} variant="ghost" size="xs">
         {t("현재 위치 다시 가져오기", "Use current location")}
+      </ActionButton>
+      <ActionButton
+        onClick={onRetryRoutes}
+        variant="ghost"
+        size="xs"
+        disabled={isRecommending}
+        className="disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isRecommending ? t("추천 중...", "Finding...") : t("경로 다시 추천", "New routes")}
       </ActionButton>
       <ActionButton
         onClick={onGoHistory}
