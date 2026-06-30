@@ -1,27 +1,115 @@
-﻿# Eat & Run Service
+<p align="center">
+  <img src="./public/og-image.png" alt="Eat & Run" width="640">
+</p>
 
-음식 사진 분석부터 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.
+<h1 align="center">Eat &amp; Run</h1>
 
-- 프론트엔드: Next.js (`/src`)
-- 백엔드: Express (`/backend`)
+<p align="center"><em>Turn what you just ate into an action you actually finish.</em></p>
 
-## 주요 기능
-- 사진 업로드 기반 음식/칼로리 분석
-- 목표 소모 칼로리 기반 운동 방식(걷기/빠른걸음/달리기) 및 시간 계산
-- 지도 기반 러닝 경로 추천
-- Supabase 기반 기록 저장 및 조회(무한 스크롤)
-- 공통 `ActionButton` 컴포넌트 기반 버튼 재사용
-- 기기별 익명 사용자 쿠키(`eat_run_uid`) 기반 기록 분리
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white">
+  <img alt="TailwindCSS" src="https://img.shields.io/badge/Tailwind-06B6D4?logo=tailwindcss&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white">
+  <img alt="Vercel" src="https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white">
+</p>
 
-## 화면 흐름
-1. `1단계 /analyze`: 음식 사진 업로드 및 분석
-2. `2단계 /activity`: 운동 방식/비율/몸무게 설정
-3. `3단계 /map`: 추천 경로 확인 및 외부 지도 열기
-4. `기록 /history`: 누적 기록 조회/필터/삭제
+<p align="center">
+  <a href="https://eat-and-run-web.vercel.app"><b>🔗 라이브 데모</b></a>
+</p>
 
-## 환경 변수
+---
 
-### 1) 백엔드 `backend/.env`
+## 무엇을, 왜
+
+칼로리 앱은 '측정'에서 멈추고, 러닝 앱은 '음식 맥락'이 없습니다. 그 사이의 빈틈 —
+**"방금 먹은 것 → 지금 당장의 구체적 행동 → 실제 완수"** 를 잇는 것이 이 제품의 가치(**다리, Bridge**)입니다.
+
+그래서 이 서비스의 성공 지표는 *'기록을 남겼는가'가 아니라* **완수율(계획 → 실제 완수 전환율)** 입니다. 이 지표가 이후 설계 결정의 기준이 됩니다.
+
+## 주요 화면
+
+> 📸 핵심 화면(완수율 카드 · 오늘의 미완료 직면 · 연속 기록 · 설치 배너) 캡처 추가 예정.
+> 지금은 [라이브 데모](https://eat-and-run-web.vercel.app)에서 직접 확인할 수 있습니다.
+
+## 핵심 기능
+
+**입구 — 분석에서 계획까지**
+- 음식 사진 업로드 / 텍스트 입력 기반 칼로리 분석 (OpenAI)
+- 체중·페이스·소모 비율에 따라 운동 방식(걷기/빠른걸음/달리기)·시간 실시간 계산
+- 지도 기반 러닝 경로 추천 (Google Maps, 2개 경로 선택)
+
+**완수 루프 — 계획에서 완수까지**
+- 1탭 **완수 체크** (Supabase `history_entries.completed_at`)
+- 당일 미완수는 **'놓침(Missed)'** 으로 자동 마감 (잔소리 없이)
+- 재방문 시 **'오늘의 미완료' 직면** + **연속 기록(Streak)**
+- **완수율 지표** 카드 — 완수 ÷ (완수 + 놓침)
+
+**플랫폼 / 재참여**
+- **PWA 설치형 셸** — 홈 화면 설치, 설치 안내 배너
+- 익명 쿠키(`eat_run_uid`) 기반 입구 → 로그인 시 기록 계정 이관(migrate)
+
+## 핵심 의사결정
+
+| 결정 | 근거 |
+|---|---|
+| 완수 판정을 **GPS 자동 → 수동 1탭 먼저** | 웹은 백그라운드 위치 추적 불가 → 검증 안 된 가설에 비싼 기능을 먼저 걸지 않음 |
+| 재참여를 **푸시 → 인앱 직면 + Streak** | 웹·익명 환경에서 푸시는 신뢰 불가(iOS 제약 등) |
+| 정체성을 **로그인 강제 → 익명 우선 + 전환 훅** | 분석은 비용(OpenAI)이라 루프는 로그인 기능, 익명은 전환 훅 |
+| PWA를 **설치형 셸까지만**(푸시·오프라인 제외) | 완수 루프 검증이 먼저 — 비싼 카드에 베팅 보류 |
+
+> 결정 근거 전문은 [`docs/adr/`](./docs/adr/) 참고. 포트폴리오 정리본은 [`docs/portfolio/eat-and-run.md`](./docs/portfolio/eat-and-run.md).
+
+## 아키텍처
+
+```
+Browser (PWA)
+   │
+   ├─ Frontend  ── Next.js App Router (/src)
+   │                 ├─ /analyze · /activity · /map · /history · /login
+   │                 ├─ /api/v1/*  (history CRUD/PATCH · 분석 프록시 · 경로추천)
+   │                 └─ 완수 로직: src/lib/completion.ts (순수 함수 + Vitest)
+   │
+   ├─ Backend   ── Express (/backend)  ── OpenAI (음식 분석)
+   │
+   └─ Supabase  ── Auth + history_entries (RLS)
+```
+
+- **프론트엔드:** Next.js · TypeScript · TailwindCSS · Zustand · TanStack Query
+- **백엔드:** Express (음식 분석 프록시)
+- **데이터/인증:** Supabase
+- **테스트:** Vitest (완수·놓침·연속기록 판정 단위 테스트)
+- **배포:** Vercel(프론트) · Render(백엔드)
+
+## 로컬 실행
+
+### 의존성 설치
+```bash
+npm install
+npm --prefix backend install
+```
+
+### 환경 변수
+
+**프론트 `.env.local`**
+```env
+# Supabase (클라이언트 인증)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# Supabase (서버 라우트 — 기록 읽기/쓰기)
+SUPABASE_SERVICE_ROLE_KEY=
+# (선택) SUPABASE_URL 미설정 시 NEXT_PUBLIC_SUPABASE_URL로 폴백
+SUPABASE_URL=
+
+# 분석 백엔드 연동
+ANALYZE_API_URL=http://localhost:4000/v1/food/analyze
+BACKEND_API_KEY=
+
+# 지도
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+```
+
+**백엔드 `backend/.env`**
 ```env
 OPENAI_API_KEY=YOUR_REAL_OPENAI_KEY
 BACKEND_API_KEY=
@@ -35,46 +123,27 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-### 2) 프론트 `.env.local`
-```env
-ANALYZE_API_URL=http://localhost:4000/v1/food/analyze
-BACKEND_API_KEY=
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-```
+- `BACKEND_API_KEY`를 백엔드에서 쓰면 프론트 `.env.local`에도 같은 값을 넣습니다.
+- Supabase 스키마는 [`supabase/schema.sql`](./supabase/schema.sql)을 SQL Editor에서 실행해 생성합니다. (완수 기능을 위해 `history_entries.completed_at` 컬럼이 포함됩니다 — 기존 DB라면 다시 실행해 반영하세요.)
 
-- `BACKEND_API_KEY`를 백엔드에서 사용하면 프론트 `.env.local`에도 같은 값을 넣어주세요.
-- Supabase 스키마는 `supabase/schema.sql`을 Supabase SQL Editor에서 실행해 생성합니다.
-- 기존에 스키마를 이미 적용했다면 `supabase/schema.sql`을 다시 실행해 `history_entries.user_id` 컬럼을 반영해 주세요.
-
-## 실행 방법
-
-### 의존성 설치
+### 실행 / 빌드 / 테스트
 ```bash
-cd C:\Users\user\Desktop\coding\eat-run-service
-npm install
-npm --prefix backend install
-```
-
-### 백엔드 실행
-```bash
-npm run backend:start
-```
-
-### 프론트엔드 실행
-```bash
-npm run dev
-```
-
-### 빌드 확인
-```bash
-npm run build
+npm run backend:start   # 백엔드(Express)
+npm run dev             # 프론트(Next.js)
+npm run build           # 프로덕션 빌드
+npm start               # 프로덕션 서버 (PWA 서비스워커는 이 모드에서 동작)
+npm test                # 단위 테스트 (Vitest)
+npm run lint            # 린트
 ```
 
 ## 배포
 
-- Vercel 배포 체크리스트: `docs/DEPLOY_VERCEL.md`
-- Render 무료 플랜 keep-alive: GitHub Actions `.github/workflows/render-keep-alive.yml`이 `10분`마다 Render 백엔드의 `/health`를 호출해 15분 유휴 슬립을 방지합니다.
+- **Vercel**(프론트) 배포 체크리스트: [`docs/DEPLOY_VERCEL.md`](./docs/DEPLOY_VERCEL.md)
+- **Render**(백엔드) 무료 플랜 keep-alive: GitHub Actions `.github/workflows/render-keep-alive.yml`이 10분마다 `/health`를 호출해 유휴 슬립 방지.
 - 필요한 GitHub Actions 시크릿: `RENDER_HEALTHCHECK_URL=https://eatandrunweb.onrender.com/health`
 
+## 문서
+
+- [`docs/adr/`](./docs/adr/) — 설계 결정 기록(왜 그렇게 판단했는가)
+- [`docs/portfolio/eat-and-run.md`](./docs/portfolio/eat-and-run.md) — 포트폴리오 정리본
+- [`CONTEXT.md`](./CONTEXT.md) — 도메인 용어집(다리 · 계획 · 완수 · 놓침 · 연속기록 · 완수율)
