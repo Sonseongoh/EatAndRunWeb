@@ -103,12 +103,12 @@ export function LandingPage() {
       <section className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-7xl flex-col justify-center px-4 pb-16 pt-12 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-            <div className="break-keep-all" data-reveal>
+            <div className="break-keep" data-reveal>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
                 <iconify-icon icon="solar:bolt-circle-linear" />
                 {t("Eat & Run 루틴 자동화", "Eat & Run Routine Automation")}
               </p>
-              <h1 className="mt-6 break-keep-all text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
+              <h1 className="mt-6 break-keep text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
                 {t("먹은 만큼,", "Based on what you ate,")}
                 <br />
                 {t("가장 실행하기 쉬운 ", "to the easiest actionable ")}<span className="whitespace-nowrap">{t("러닝으로", "run")}</span>
@@ -116,7 +116,7 @@ export function LandingPage() {
                   {t("오늘 바로 연결합니다", "we connect it today")}
                 </span>
               </h1>
-              <p className="mt-6 max-w-[65ch] break-keep-all text-base leading-relaxed text-zinc-300 md:text-lg">
+              <p className="mt-6 max-w-[65ch] break-keep text-base leading-relaxed text-zinc-300 md:text-lg">
                 {t(
                   "음식 사진 업로드부터 칼로리 분석, 운동 강도 설정, 지도 기반 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.",
                   "From meal photo upload to calorie analysis, intensity setting, and map route recommendation, everything is connected in one practical health routine flow."
@@ -177,8 +177,8 @@ export function LandingPage() {
       </section>
 
       <section id="features" className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="break-keep-all" data-reveal>
+        <div className="flex flex-col gap-10">
+          <div className="break-keep" data-reveal>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">{t("핵심 기능", "Core features")}</p>
             <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
               {t("기록이 아니라,", "Not just logging,")}
@@ -193,20 +193,18 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-1 gap-4 sm:grid-cols-2" data-reveal>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal>
             {featureCards.map((feature, index) => (
               <article
                 key={feature.titleKo}
-                className={`reveal-item rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-emerald-200/30 hover:bg-white/[0.07] ${
-                  index === 0 ? "sm:col-span-2" : ""
-                }`}
+                className="reveal-item rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-emerald-200/30 hover:bg-white/[0.07]"
                 style={{ ["--index" as string]: index } as CSSProperties}
               >
                 <iconify-icon icon={feature.icon} className="text-2xl text-emerald-200" />
-                <h3 className="mt-4 break-keep-all text-xl font-semibold text-white">
+                <h3 className="mt-4 break-keep text-xl font-semibold text-white">
                   {locale === "ko" ? feature.titleKo : feature.titleEn}
                 </h3>
-                <p className="mt-3 break-keep-all text-sm leading-relaxed text-zinc-300">
+                <p className="mt-3 break-keep text-sm leading-relaxed text-zinc-300">
                   {locale === "ko" ? feature.descriptionKo : feature.descriptionEn}
                 </p>
               </article>
@@ -218,7 +216,7 @@ export function LandingPage() {
       {/* <section className="relative z-10 border-y border-white/10 bg-zinc-900/50 py-24 lg:py-32">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="break-keep-all" data-reveal>
+            <div className="break-keep" data-reveal>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-200">사용자 후기</p>
               <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
                 숫자보다 중요한 건
@@ -236,7 +234,7 @@ export function LandingPage() {
                   }`}
                   style={{ ["--index" as string]: index } as CSSProperties}
                 >
-                  <p className="break-keep-all text-sm leading-relaxed text-zinc-200">{testimonial.quote}</p>
+                  <p className="break-keep text-sm leading-relaxed text-zinc-200">{testimonial.quote}</p>
                   <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                     <div>
                       <p className="text-sm font-semibold text-white">{testimonial.name}</p>
@@ -256,7 +254,7 @@ export function LandingPage() {
       <section className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32" data-reveal>
         <div className="rounded-3xl border border-emerald-200/20 bg-[linear-gradient(130deg,rgba(16,185,129,0.24),rgba(10,10,10,0.65)_62%)] p-8 backdrop-blur xl:p-12">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="break-keep-all">
+            <div className="break-keep">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100">{t("지금 시작하기", "Start now")}</p>
               <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-5xl">
                 {t("오늘 먹은 한 끼,", "Turn today's meal")}
@@ -297,7 +295,7 @@ export function LandingPage() {
 
       <footer className="relative z-10 border-t border-white/10 bg-zinc-950/90">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="break-keep-all">
+          <div className="break-keep">
             <p className="text-lg font-semibold text-white">Eat & Run</p>
             <p className="mt-2 text-sm text-zinc-400">
               {t("먹은 만큼 똑똑하게 달리는 실행형 건강 루틴 서비스", "Actionable health routine service that turns meals into smart running plans")}
