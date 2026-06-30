@@ -101,8 +101,8 @@ export function LandingPage() {
       <div className="noise-layer pointer-events-none absolute inset-0 z-0 opacity-30" />
 
       <section className="relative z-10 border-b border-white/10">
-        <div className="mx-auto flex min-h-[100dvh] w-full max-w-7xl flex-col px-4 pb-16 pt-12 sm:px-6 lg:px-8">
-          <div className="grid flex-1 items-center gap-12 pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+        <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-7xl flex-col justify-center px-4 pb-16 pt-12 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
             <div className="break-keep-all" data-reveal>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
                 <iconify-icon icon="solar:bolt-circle-linear" />

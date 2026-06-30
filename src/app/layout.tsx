@@ -55,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body>
         {/* Google Maps JS는 /map 화면의 GoogleRouteMap(useJsApiLoader)에서만 로드한다.
             전역 주입을 제거해 지도가 없는 페이지의 초기 로딩을 가볍게 유지. */}
