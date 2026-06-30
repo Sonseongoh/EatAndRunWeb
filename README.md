@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/og-image.png" alt="Eat & Run" width="640">
+  <img src="./public/icon-512.png" alt="Eat & Run" width="180">
 </p>
 
 <h1 align="center">Eat &amp; Run</h1>
@@ -29,8 +29,19 @@
 
 ## 주요 화면
 
-> 📸 핵심 화면(완수율 카드 · 오늘의 미완료 직면 · 연속 기록 · 설치 배너) 캡처 추가 예정.
-> 지금은 [라이브 데모](https://eat-and-run-web.vercel.app)에서 직접 확인할 수 있습니다.
+**랜딩 — "먹은 만큼, 오늘 바로 연결"**
+
+![랜딩](./docs/screenshots/landing.png)
+
+**음식 분석 (입구)**
+
+![음식 분석](./docs/screenshots/analyze.png)
+
+**게스트 전환 — 완수 루프 가치(연속 기록·완수 체크·완수율)로 로그인 유도**
+
+![게스트 전환 화면](./docs/screenshots/guest-history.png)
+
+> 로그인 후 완수 루프 화면(완수 토글 · 오늘의 미완료 직면 · 연속 기록 · 완수율 카드)은 [라이브 데모](https://eat-and-run-web.vercel.app)에서 확인할 수 있습니다.
 
 ## 핵심 기능
 
