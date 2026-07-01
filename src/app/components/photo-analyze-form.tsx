@@ -97,7 +97,13 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
 
   useEffect(() => {
     if (typeof navigator === "undefined") return;
-    setIsMobile(/iphone|ipad|ipod|android|mobile/i.test(navigator.userAgent));
+    const uaMobile = /iphone|ipad|ipod|android|mobile/i.test(navigator.userAgent);
+    // 터치 우선 기기(폰·태블릿) 감지 — iPadOS가 데스크톱 UA로 위장해도 잡힌다.
+    const coarsePointer =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches;
+    setIsMobile(uaMobile || coarsePointer);
   }, []);
 
   async function onAnalyze() {
