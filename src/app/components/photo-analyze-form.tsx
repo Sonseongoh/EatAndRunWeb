@@ -63,7 +63,8 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const albumInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   const analyzeMutation = useMutation({
     mutationFn: analyzeFoodImage
@@ -105,10 +106,20 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
 
   return (
     <>
+      {/* 앨범/파일 선택 */}
       <input
-        ref={fileInputRef}
+        ref={albumInputRef}
         type="file"
         accept="image/*"
+        onChange={onSelectImage}
+        className="hidden"
+      />
+      {/* 카메라 촬영 (모바일에서 후면 카메라 바로 열림; 데스크톱은 capture 무시). */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         onChange={onSelectImage}
         className="hidden"
       />
@@ -140,24 +151,29 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
               }}
             />
           </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
-          >
-            {t("사진 변경", "Change photo")}
-          </button>
+          <div className="absolute right-5 top-5 flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
+            >
+              {t("카메라", "Camera")}
+            </button>
+            <button
+              type="button"
+              onClick={() => albumInputRef.current?.click()}
+              className="flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
+            >
+              {t("앨범", "Album")}
+            </button>
+          </div>
           <p className="absolute bottom-3 left-3 rounded-md bg-black/45 px-2 py-1 text-xs text-white">
             {selectedFile?.name}
           </p>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="group flex h-96 w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/25 text-sm text-zinc-400 transition hover:border-emerald-300 hover:bg-emerald-300/10 md:h-[28rem]"
-        >
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-zinc-200 transition group-hover:border-emerald-300 group-hover:text-emerald-200">
+        <div className="flex h-96 w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-white/25 text-sm text-zinc-400 md:h-[28rem]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-zinc-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -169,11 +185,21 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
             </svg>
           </div>
-          <p className="font-semibold text-zinc-100">{t("사진 선택하기", "Select photo")}</p>
-          <p className="mt-1 text-xs text-zinc-400">
-            {t("클릭해서 음식 사진을 업로드해주세요", "Click to upload your meal photo")}
-          </p>
-        </button>
+          <div className="text-center">
+            <p className="font-semibold text-zinc-100">{t("사진 선택하기", "Select photo")}</p>
+            <p className="mt-1 text-xs text-zinc-400">
+              {t("음식을 촬영하거나 앨범에서 선택하세요", "Take a photo or pick from your album")}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <ActionButton onClick={() => cameraInputRef.current?.click()} variant="ghost" size="sm">
+              {t("카메라", "Camera")}
+            </ActionButton>
+            <ActionButton onClick={() => albumInputRef.current?.click()} variant="primary" size="sm">
+              {t("앨범", "Album")}
+            </ActionButton>
+          </div>
+        </div>
       )}
 
       <ActionButton
