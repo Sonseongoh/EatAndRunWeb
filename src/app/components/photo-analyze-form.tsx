@@ -65,6 +65,8 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const albumInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  // 카메라 촬영(capture)은 모바일에서만 의미가 있어, 데스크톱에선 카메라 버튼을 숨긴다.
+  const [isMobile, setIsMobile] = useState(false);
 
   const analyzeMutation = useMutation({
     mutationFn: analyzeFoodImage
@@ -92,6 +94,11 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
   useEffect(() => {
     onDirtyChange?.(Boolean(selectedFile || analyzeMutation.data));
   }, [analyzeMutation.data, onDirtyChange, selectedFile]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    setIsMobile(/iphone|ipad|ipod|android|mobile/i.test(navigator.userAgent));
+  }, []);
 
   async function onAnalyze() {
     if (!selectedFile) return;
@@ -152,19 +159,21 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
             />
           </div>
           <div className="absolute right-5 top-5 flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              className="flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
-            >
-              {t("카메라", "Camera")}
-            </button>
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                className="flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
+              >
+                {t("카메라", "Camera")}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => albumInputRef.current?.click()}
               className="flex items-center gap-1 rounded-full bg-zinc-100/95 px-3 py-1.5 text-xs font-semibold text-zinc-900 shadow-sm hover:bg-white"
             >
-              {t("앨범", "Album")}
+              {isMobile ? t("앨범", "Album") : t("사진 변경", "Change photo")}
             </button>
           </div>
           <p className="absolute bottom-3 left-3 rounded-md bg-black/45 px-2 py-1 text-xs text-white">
@@ -192,11 +201,13 @@ export function PhotoAnalyzeForm({ onDirtyChange }: PhotoAnalyzeFormProps) {
             </p>
           </div>
           <div className="flex gap-2">
-            <ActionButton onClick={() => cameraInputRef.current?.click()} variant="ghost" size="sm">
-              {t("카메라", "Camera")}
-            </ActionButton>
+            {isMobile && (
+              <ActionButton onClick={() => cameraInputRef.current?.click()} variant="ghost" size="sm">
+                {t("카메라", "Camera")}
+              </ActionButton>
+            )}
             <ActionButton onClick={() => albumInputRef.current?.click()} variant="primary" size="sm">
-              {t("앨범", "Album")}
+              {isMobile ? t("앨범", "Album") : t("사진 선택", "Select photo")}
             </ActionButton>
           </div>
         </div>
