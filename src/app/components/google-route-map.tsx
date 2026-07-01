@@ -8,11 +8,12 @@ type LatLngPoint = { lat: number; lng: number };
 type GoogleRouteMapProps = {
   center: LatLngPoint;
   path: LatLngPoint[];
+  currentPosition?: LatLngPoint | null;
 };
 
 const containerStyle = { width: "100%", height: "100%" };
 
-export function GoogleRouteMap({ center, path }: GoogleRouteMapProps) {
+export function GoogleRouteMap({ center, path, currentPosition }: GoogleRouteMapProps) {
   const { t } = useLocale();
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const { isLoaded } = useJsApiLoader({
@@ -47,6 +48,20 @@ export function GoogleRouteMap({ center, path }: GoogleRouteMapProps) {
       options={{ fullscreenControl: false, mapTypeControl: false }}
     >
       <Marker position={center} />
+      {currentPosition && (
+        <Marker
+          position={currentPosition}
+          zIndex={1000}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 7,
+            fillColor: "#34d399",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2
+          }}
+        />
+      )}
       {path.length > 1 && (
         <>
           <Polyline

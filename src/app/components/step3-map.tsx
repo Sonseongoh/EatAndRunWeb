@@ -3,8 +3,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ActionButton } from "@/app/components/action-button";
 import { recommendRunningRoutes, saveHistoryEntry } from "@/lib/api";
 import { calcAverageKcal } from "@/lib/running";
+import { useRouteFollow } from "@/lib/use-route-follow";
 import { useLocale } from "@/providers/locale-provider";
 import { useFlowStore } from "@/store/use-flow-store";
 import { useRunProfileStore } from "@/store/use-run-profile-store";
@@ -24,6 +26,15 @@ export function Step3Map() {
   const [locationError, setLocationError] = useState("");
   const savedKeyRef = useRef<string>("");
   const routeRequestKeyRef = useRef<string>("");
+
+  const {
+    isTracking,
+    currentPosition,
+    traveledKm,
+    errorCode: followErrorCode,
+    start: startFollow,
+    stop: stopFollow
+  } = useRouteFollow();
 
   const routeMutation = useMutation({
     mutationFn: recommendRunningRoutes
@@ -224,6 +235,18 @@ export function Step3Map() {
   const center = selectedRoute?.start || { lat: startLat, lng: startLng };
   const path = selectedRoute?.path || [];
 
+  const followErrorMessage =
+    followErrorCode === "unsupported"
+      ? t("이 브라우저에서는 위치 기능을 사용할 수 없습니다.", "Location is not available in this browser.")
+      : followErrorCode === "denied"
+        ? t(
+            "위치 권한이 거부되었습니다. 브라우저 설정에서 위치 접근을 허용해주세요.",
+            "Location permission was denied. Please allow location access in your browser settings."
+          )
+        : followErrorCode === "failed"
+          ? t("현재 위치를 추적하지 못했습니다. 다시 시도해주세요.", "Failed to track your location. Please try again.")
+          : "";
+
   return (
     <main className="app-shell md:px-8">
       <section className="glass-card text-center">
@@ -252,6 +275,7 @@ export function Step3Map() {
           selectedRouteIndex={selectedRouteIndex}
           center={center}
           path={path}
+          currentPosition={currentPosition}
           isPending={routeMutation.isPending}
           isError={routeMutation.isError}
           errorMessage={(routeMutation.error as Error)?.message ?? ""}
@@ -259,6 +283,39 @@ export function Step3Map() {
           onRetry={onRetryRouteRecommend}
           onSelectRoute={setSelectedRouteIndex}
         />
+
+        {selectedRoute && (
+          <div className="glass-soft flex flex-wrap items-center justify-between gap-3 p-3">
+            <p className="text-sm text-zinc-200">
+              {isTracking ? (
+                <>
+                  <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-400 align-middle" />
+                  {t("따라가는 중", "Following")} · {t("이동", "Distance")} {traveledKm.toFixed(2)}km
+                </>
+              ) : (
+                t(
+                  "경로를 따라가며 실시간 위치를 지도에서 확인하세요.",
+                  "Follow the route and see your live position on the map."
+                )
+              )}
+            </p>
+            {isTracking ? (
+              <ActionButton onClick={stopFollow} variant="danger" size="xs">
+                {t("따라가기 중지", "Stop")}
+              </ActionButton>
+            ) : (
+              <ActionButton onClick={startFollow} variant="primary" size="xs">
+                {t("따라가기 시작", "Start following")}
+              </ActionButton>
+            )}
+          </div>
+        )}
+
+        {followErrorMessage && (
+          <p className="text-sm text-red-300" role="alert">
+            {followErrorMessage}
+          </p>
+        )}
 
         {locationError && (
           <p className="text-sm text-red-300" role="alert">
