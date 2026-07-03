@@ -100,19 +100,19 @@ export function HistoryList({
                             {t("놓침", "Missed")}
                           </span>
                         )}
-                        {/* 놓침(missed)은 당일 마감되어 완료 액션을 제공하지 않는다. */}
-                        {state !== "missed" && (
+                        {/* 오늘 미완료만 카드에서 바로 완료 처리. 완료 취소는 상세에서. */}
+                        {state === "pending" && (
                           <ActionButton
                             onClick={(event) => {
                               event.stopPropagation();
                               onToggleComplete(entry);
                             }}
                             disabled={togglingId === entry.id}
-                            variant={state === "completed" ? "ghost" : "primary"}
+                            variant="primary"
                             size="xs"
                             className="py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            {state === "completed" ? t("완료 취소", "Undo") : t("했어요", "Mark done")}
+                            {t("했어요", "Mark done")}
                           </ActionButton>
                         )}
                       </div>

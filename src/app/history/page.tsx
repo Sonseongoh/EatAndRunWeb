@@ -230,6 +230,11 @@ export default function HistoryPage() {
 
   const isEmpty = !isLoading && entries.length === 0;
   const isConfirmPending = deleteMutation.isPending || clearMutation.isPending;
+  // 상세 모달은 열 때의 스냅샷이 아니라 목록에서 id로 라이브 조회한다.
+  // (완료 토글의 낙관적 업데이트가 모달에도 즉시 반영되도록)
+  const liveDetailEntry = detailEntry
+    ? entries.find((entry) => entry.id === detailEntry.id) ?? detailEntry
+    : null;
 
   function openDetail(entry: HistoryEntry) {
     setDetailEntry(entry);
@@ -399,11 +404,15 @@ export default function HistoryPage() {
       />
 
       <HistoryDetailModal
-        detailEntry={detailEntry}
+        detailEntry={liveDetailEntry}
         detailRouteIndex={detailRouteIndex}
+        isToggling={
+          completeMutation.isPending && completeMutation.variables?.id === liveDetailEntry?.id
+        }
         t={t}
         onClose={() => setDetailEntry(null)}
         onSelectRoute={setDetailRouteIndex}
+        onToggleComplete={toggleComplete}
       />
     </main>
   );

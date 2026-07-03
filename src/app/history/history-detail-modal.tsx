@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { ActionButton } from "@/app/components/action-button";
+import { deriveCompletionState } from "@/lib/completion";
 import { HistoryEntry } from "@/lib/types";
 
 const DynamicGoogleRouteMap = dynamic(
@@ -12,21 +13,27 @@ const DynamicGoogleRouteMap = dynamic(
 type HistoryDetailModalProps = {
   detailEntry: HistoryEntry | null;
   detailRouteIndex: number;
+  isToggling: boolean;
   t: (ko: string, en: string) => string;
   onClose: () => void;
   onSelectRoute: (index: number) => void;
+  onToggleComplete: (entry: HistoryEntry) => void;
 };
 
 export function HistoryDetailModal({
   detailEntry,
   detailRouteIndex,
+  isToggling,
   t,
   onClose,
-  onSelectRoute
+  onSelectRoute,
+  onToggleComplete
 }: HistoryDetailModalProps) {
   if (!detailEntry) return null;
 
   const detailRoute = detailEntry.routes[detailRouteIndex] ?? null;
+  const state = deriveCompletionState(detailEntry, new Date());
+  const completedAt = detailEntry.completion?.completedAt;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -41,6 +48,46 @@ export function HistoryDetailModal({
           <ActionButton onClick={onClose} variant="ghost" size="xs">
             {t("닫기", "Close")}
           </ActionButton>
+        </div>
+
+        {/* 완수 상태 + 완료 토글(완료 취소 포함). 카드에선 뺀 완료 취소를 여기서 처리. */}
+        <div className="glass-soft flex flex-wrap items-center justify-between gap-3 p-3">
+          <div className="flex items-center gap-2 text-sm">
+            {state === "completed" && (
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200">
+                {t("완료", "Done")}
+              </span>
+            )}
+            {state === "missed" && (
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
+                {t("놓침", "Missed")}
+              </span>
+            )}
+            <span className="text-zinc-300">
+              {state === "completed"
+                ? completedAt
+                  ? t(
+                      `완료함 · ${new Date(completedAt).toLocaleString()}`,
+                      `Completed · ${new Date(completedAt).toLocaleString()}`
+                    )
+                  : t("완료한 계획입니다.", "This plan is completed.")
+                : state === "missed"
+                  ? t("당일에 완료하지 못한 계획입니다.", "This plan was not completed that day.")
+                  : t("아직 완료하지 않은 계획입니다.", "This plan isn't completed yet.")}
+            </span>
+          </div>
+          {/* 놓침(missed)은 당일 마감되어 완료 액션을 제공하지 않는다. */}
+          {state !== "missed" && (
+            <ActionButton
+              onClick={() => onToggleComplete(detailEntry)}
+              disabled={isToggling}
+              variant={state === "completed" ? "ghost" : "primary"}
+              size="xs"
+              className="disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {state === "completed" ? t("완료 취소", "Undo") : t("했어요", "Mark done")}
+            </ActionButton>
+          )}
         </div>
 
         {detailEntry.routes.length > 1 && (
