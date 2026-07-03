@@ -46,7 +46,9 @@ export function GoogleRouteMap({ center, path, currentPosition, trail }: GoogleR
       mapContainerStyle={containerStyle}
       center={center}
       zoom={15}
-      options={{ fullscreenControl: false, mapTypeControl: false }}
+      // gestureHandling "greedy": 모바일에서 한 손가락만으로 지도 이동/확대.
+      // (기본 cooperative는 두 손가락을 요구해 불편)
+      options={{ fullscreenControl: false, mapTypeControl: false, gestureHandling: "greedy" }}
     >
       <Marker position={center} />
       {currentPosition && (
