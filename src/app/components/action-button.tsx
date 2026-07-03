@@ -73,7 +73,13 @@ function omitBaseProps<T extends BaseProps>(value: T) {
 export function ActionButton(props: ActionButtonProps) {
   const variant = props.variant ?? "primary";
   const size = props.size ?? "sm";
-  const className = cn(variantClasses[variant], sizeClasses[size], props.className);
+  // whitespace-nowrap: 좁은(모바일) 레이아웃에서 라벨이 세로로 쪼개지지 않게 기본 보장.
+  const className = cn(
+    "whitespace-nowrap",
+    variantClasses[variant],
+    sizeClasses[size],
+    props.className
+  );
   const icon = props.icon;
   const iconPosition = props.iconPosition ?? "left";
   const iconClassName = props.iconClassName;

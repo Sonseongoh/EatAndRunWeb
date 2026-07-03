@@ -271,7 +271,7 @@ export default function HistoryPage() {
             <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("활동 기록", "Activity history")}</h1>
             {streak > 0 && (
               <span
-                className="rounded-full border border-amber-300/60 bg-amber-300/15 px-3 py-1 text-sm font-semibold text-amber-200"
+                className="shrink-0 whitespace-nowrap rounded-full border border-amber-300/60 bg-amber-300/15 px-3 py-1 text-sm font-semibold text-amber-200"
                 title={t("연속 완수 일수", "Completion streak")}
               >
                 🔥 {t(`${streak}일 연속`, `${streak}-day streak`)}

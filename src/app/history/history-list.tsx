@@ -59,18 +59,18 @@ export function HistoryList({
                   }}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1 text-sm text-zinc-200">
-                      <p className="flex items-center gap-2 font-semibold text-zinc-100">
-                        <span>
+                    <div className="min-w-0 space-y-1 text-sm text-zinc-200">
+                      <p className="flex items-start gap-2 font-semibold text-zinc-100">
+                        <span className="min-w-0 break-keep">
                           {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
                         </span>
                         {state === "completed" && (
-                          <span className="rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2 py-0.5 text-xs font-medium text-emerald-200">
+                          <span className="mt-0.5 shrink-0 whitespace-nowrap rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2 py-0.5 text-xs font-medium text-emerald-200">
                             {t("완료", "Done")}
                           </span>
                         )}
                         {state === "missed" && (
-                          <span className="rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2 py-0.5 text-xs font-medium text-zinc-400">
+                          <span className="mt-0.5 shrink-0 whitespace-nowrap rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2 py-0.5 text-xs font-medium text-zinc-400">
                             {t("놓침", "Missed")}
                           </span>
                         )}
