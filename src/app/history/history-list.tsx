@@ -58,22 +58,10 @@ export function HistoryList({
                     }
                   }}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-stretch justify-between gap-3">
                     <div className="min-w-0 space-y-1 text-sm text-zinc-200">
-                      <p className="flex items-start gap-2 font-semibold text-zinc-100">
-                        <span className="min-w-0 break-keep">
-                          {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
-                        </span>
-                        {state === "completed" && (
-                          <span className="mt-0.5 shrink-0 whitespace-nowrap rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2 py-0.5 text-xs font-medium text-emerald-200">
-                            {t("완료", "Done")}
-                          </span>
-                        )}
-                        {state === "missed" && (
-                          <span className="mt-0.5 shrink-0 whitespace-nowrap rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2 py-0.5 text-xs font-medium text-zinc-400">
-                            {t("놓침", "Missed")}
-                          </span>
-                        )}
+                      <p className="break-keep font-semibold text-zinc-100">
+                        {entry.analysis.foodName} | {entry.analysis.kcalAvg} kcal
                       </p>
                       <p className="text-xs text-zinc-400">
                         {new Date(entry.createdAt).toLocaleTimeString()}
@@ -99,33 +87,62 @@ export function HistoryList({
                         {t("경로", "Routes")}: {entry.routes.map((route) => route.name).join(", ")}
                       </p>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-2">
-                      {/* 놓침(missed)은 당일 마감되어 완료 액션을 제공하지 않는다. */}
-                      {state !== "missed" && (
-                        <ActionButton
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onToggleComplete(entry);
-                          }}
-                          disabled={togglingId === entry.id}
-                          variant={state === "completed" ? "ghost" : "primary"}
-                          size="xs"
-                          className="py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {state === "completed" ? t("완료 취소", "Undo") : t("했어요", "Mark done")}
-                        </ActionButton>
-                      )}
-                      <ActionButton
+                    <div className="flex shrink-0 flex-col items-end justify-between gap-3 self-stretch">
+                      {/* 우측 상단: 완수 상태 배지 + 완료 토글 */}
+                      <div className="flex flex-col items-end gap-2">
+                        {state === "completed" && (
+                          <span className="shrink-0 whitespace-nowrap rounded-full border border-emerald-300/60 bg-emerald-300/15 px-2.5 py-0.5 text-xs font-medium text-emerald-200">
+                            {t("완료", "Done")}
+                          </span>
+                        )}
+                        {state === "missed" && (
+                          <span className="shrink-0 whitespace-nowrap rounded-full border border-zinc-500/60 bg-zinc-500/15 px-2.5 py-0.5 text-xs font-medium text-zinc-400">
+                            {t("놓침", "Missed")}
+                          </span>
+                        )}
+                        {/* 놓침(missed)은 당일 마감되어 완료 액션을 제공하지 않는다. */}
+                        {state !== "missed" && (
+                          <ActionButton
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onToggleComplete(entry);
+                            }}
+                            disabled={togglingId === entry.id}
+                            variant={state === "completed" ? "ghost" : "primary"}
+                            size="xs"
+                            className="py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {state === "completed" ? t("완료 취소", "Undo") : t("했어요", "Mark done")}
+                          </ActionButton>
+                        )}
+                      </div>
+
+                      {/* 우측 하단: 삭제(파괴적·보조 액션이라 아이콘으로 축소) */}
+                      <button
+                        type="button"
                         onClick={(event) => {
                           event.stopPropagation();
                           onRequestDelete(entry);
                         }}
-                        variant="danger"
-                        size="xs"
-                        className="py-1.5"
+                        aria-label={t("삭제", "Delete")}
+                        title={t("삭제", "Delete")}
+                        className="rounded-lg p-2 text-zinc-500 transition hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300/40"
                       >
-                        {t("삭제", "Delete")}
-                      </ActionButton>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className="h-5 w-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </article>
