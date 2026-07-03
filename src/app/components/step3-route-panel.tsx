@@ -15,6 +15,7 @@ type Step3RoutePanelProps = {
   center: { lat: number; lng: number };
   path: Array<{ lat: number; lng: number }>;
   currentPosition?: { lat: number; lng: number } | null;
+  trail?: Array<{ lat: number; lng: number }>;
   isPending: boolean;
   isError: boolean;
   errorMessage: string;
@@ -29,6 +30,7 @@ export function Step3RoutePanel({
   center,
   path,
   currentPosition,
+  trail,
   isPending,
   isError,
   errorMessage,
@@ -87,7 +89,12 @@ export function Step3RoutePanel({
           </div>
 
           <div className="h-[420px] overflow-hidden rounded-xl border border-white/20 bg-zinc-900/60">
-            <DynamicGoogleRouteMap center={center} path={path} currentPosition={currentPosition} />
+            <DynamicGoogleRouteMap
+              center={center}
+              path={path}
+              currentPosition={currentPosition}
+              trail={trail}
+            />
           </div>
         </>
       )}

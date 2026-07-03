@@ -28,6 +28,8 @@ type WakeLockSentinelLike = { release: () => Promise<void> };
 export function useRouteFollow() {
   const [isTracking, setIsTracking] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<LatLng | null>(null);
+  // 지나온 궤적(자취). 유의미하게 움직일 때마다 좌표를 누적해 지도에 실제 이동 경로를 그린다.
+  const [trail, setTrail] = useState<LatLng[]>([]);
   const [traveledKm, setTraveledKm] = useState(0);
   const [errorCode, setErrorCode] = useState<RouteFollowError>("");
 
@@ -70,6 +72,7 @@ export function useRouteFollow() {
     }
     setErrorCode("");
     setTraveledKm(0);
+    setTrail([]);
     setCurrentPosition(null);
     lastPosRef.current = null;
     setIsTracking(true);
@@ -85,10 +88,13 @@ export function useRouteFollow() {
           // GPS 노이즈로 인한 미세 이동(<8m)은 누적하지 않는다.
           if (moved >= 0.008) {
             setTraveledKm((km) => km + moved);
+            setTrail((prev) => [...prev, next]);
             lastPosRef.current = next;
           }
         } else {
+          // 첫 위치 확정: 궤적의 시작점으로 기록.
           lastPosRef.current = next;
+          setTrail([next]);
         }
       },
       (geoError) => {
@@ -112,5 +118,5 @@ export function useRouteFollow() {
   // 언마운트 시 정리.
   useEffect(() => stop, [stop]);
 
-  return { isTracking, currentPosition, traveledKm, errorCode, start, stop };
+  return { isTracking, currentPosition, trail, traveledKm, errorCode, start, stop };
 }

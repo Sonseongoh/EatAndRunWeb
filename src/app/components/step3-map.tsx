@@ -30,6 +30,7 @@ export function Step3Map() {
   const {
     isTracking,
     currentPosition,
+    trail,
     traveledKm,
     errorCode: followErrorCode,
     start: startFollow,
@@ -276,6 +277,7 @@ export function Step3Map() {
           center={center}
           path={path}
           currentPosition={currentPosition}
+          trail={trail}
           isPending={routeMutation.isPending}
           isError={routeMutation.isError}
           errorMessage={(routeMutation.error as Error)?.message ?? ""}
@@ -307,6 +309,22 @@ export function Step3Map() {
               <ActionButton onClick={startFollow} variant="primary" size="xs">
                 {t("따라가기 시작", "Start following")}
               </ActionButton>
+            )}
+            {isTracking && (
+              <div className="flex w-full items-center gap-4 text-xs text-zinc-400">
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-0.5 w-4 rounded-full bg-sky-400" />
+                  {t("추천 경로", "Recommended")}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-0.5 w-4 rounded-full bg-amber-500" />
+                  {t("실제 이동", "Your path")}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+                  {t("현재 위치", "You")}
+                </span>
+              </div>
             )}
           </div>
         )}

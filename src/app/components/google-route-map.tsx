@@ -9,11 +9,12 @@ type GoogleRouteMapProps = {
   center: LatLngPoint;
   path: LatLngPoint[];
   currentPosition?: LatLngPoint | null;
+  trail?: LatLngPoint[];
 };
 
 const containerStyle = { width: "100%", height: "100%" };
 
-export function GoogleRouteMap({ center, path, currentPosition }: GoogleRouteMapProps) {
+export function GoogleRouteMap({ center, path, currentPosition, trail }: GoogleRouteMapProps) {
   const { t } = useLocale();
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const { isLoaded } = useJsApiLoader({
@@ -81,6 +82,18 @@ export function GoogleRouteMap({ center, path, currentPosition }: GoogleRouteMap
             }}
           />
         </>
+      )}
+      {/* 실제 지나온 궤적(주황) — 추천 경로(파랑) 위에 겹쳐 그려 이탈 여부를 눈으로 비교. */}
+      {trail && trail.length > 1 && (
+        <Polyline
+          path={trail}
+          options={{
+            strokeColor: "#f59e0b",
+            strokeOpacity: 0.95,
+            strokeWeight: 5,
+            zIndex: 500
+          }}
+        />
       )}
     </GoogleMap>
   );
