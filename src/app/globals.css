@@ -19,6 +19,19 @@ body {
   overflow-wrap: break-word;
 }
 
+/* 키보드 포커스 링 브랜드 통일: 기본 흰색 대신 에메랄드.
+   :focus-visible라 키보드 이동에만 그려지고 마우스/터치에는 안 보인다. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid rgba(52, 211, 153, 0.9);
+  outline-offset: 2px;
+}
+
 .noise-layer {
   background-image: radial-gradient(rgba(255, 255, 255, 0.1) 0.6px, transparent 0.6px);
   background-size: 3px 3px;

@@ -91,8 +91,9 @@ export default function RootLayout({
           <LocaleProvider>
             <AuthProvider>
               <TopNav />
-              <LocaleFab />
               {children}
+              {/* fixed 요소라 위치는 그대로 — 본문 뒤에 두어 키보드 탭 순서가 콘텐츠 먼저가 되게 한다. */}
+              <LocaleFab />
               <InstallPrompt />
               <PwaRegister />
             </AuthProvider>

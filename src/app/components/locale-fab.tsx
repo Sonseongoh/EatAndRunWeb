@@ -11,10 +11,11 @@ export function LocaleFab() {
       aria-label="Language selector"
     >
       <div className="inline-flex overflow-hidden rounded-full border border-white/20 bg-zinc-950/85 shadow-lg backdrop-blur-md">
+        {/* 래퍼 overflow-hidden이 바깥 링을 잘라내므로 포커스 링만 안쪽으로 그린다. */}
         <button
           type="button"
           onClick={() => setLocale("ko")}
-          className={`px-3 py-2 text-xs font-semibold transition ${
+          className={`px-3 py-2 text-xs font-semibold transition focus-visible:outline-offset-[-2px] ${
             locale === "ko" ? "bg-white text-zinc-900" : "text-zinc-100 hover:bg-white/10"
           }`}
         >
@@ -23,7 +24,7 @@ export function LocaleFab() {
         <button
           type="button"
           onClick={() => setLocale("en")}
-          className={`px-3 py-2 text-xs font-semibold transition ${
+          className={`px-3 py-2 text-xs font-semibold transition focus-visible:outline-offset-[-2px] ${
             locale === "en" ? "bg-white text-zinc-900" : "text-zinc-100 hover:bg-white/10"
           }`}
         >
