@@ -33,16 +33,23 @@ export function InstallPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone()) return;
-    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    // "dismissed"(사용자가 ✕)·레거시 "1"은 계속 숨김을 존중.
+    // "installed"는 숨기되 아래 beforeinstallprompt를 계속 듣는다 — 설치된 동안엔
+    // 이 이벤트가 안 오므로, 다시 발화하면 앱이 삭제됐다는 증거 → 배너 부활.
+    const stored = localStorage.getItem(DISMISS_KEY);
+    if (stored === "dismissed" || stored === "1") return;
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
+      if (localStorage.getItem(DISMISS_KEY) === "installed") {
+        localStorage.removeItem(DISMISS_KEY);
+      }
       setDeferred(event as BeforeInstallPromptEvent);
       setShow(true);
     };
     const onInstalled = () => {
       setShow(false);
-      localStorage.setItem(DISMISS_KEY, "1");
+      localStorage.setItem(DISMISS_KEY, "installed");
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
@@ -62,16 +69,19 @@ export function InstallPrompt() {
 
   function dismiss() {
     setShow(false);
-    localStorage.setItem(DISMISS_KEY, "1");
+    localStorage.setItem(DISMISS_KEY, "dismissed");
   }
 
   async function install() {
     if (!deferred) return;
     await deferred.prompt();
-    await deferred.userChoice;
+    const choice = await deferred.userChoice;
     setShow(false);
     setDeferred(null);
-    localStorage.setItem(DISMISS_KEY, "1");
+    // 네이티브 프롬프트를 취소한 경우엔 플래그를 남기지 않아 다음 방문에 다시 노출.
+    if (choice.outcome === "accepted") {
+      localStorage.setItem(DISMISS_KEY, "installed");
+    }
   }
 
   if (!show) return null;
@@ -97,7 +107,7 @@ export function InstallPrompt() {
           </p>
         </div>
         {!iosHint && (
-          <ActionButton onClick={install} variant="primary" size="xs" className="shrink-0">
+          <ActionButton onClick={install} variant="primary" size="sm" className="shrink-0">
             {t("설치", "Install")}
           </ActionButton>
         )}
@@ -105,7 +115,7 @@ export function InstallPrompt() {
           type="button"
           onClick={dismiss}
           aria-label={t("닫기", "Dismiss")}
-          className="shrink-0 rounded-md px-2 py-1 text-zinc-400 hover:text-zinc-200"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200"
         >
           ✕
         </button>
