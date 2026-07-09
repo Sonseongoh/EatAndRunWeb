@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { ActionButton } from "@/app/components/action-button";
 import { useLocale } from "@/providers/locale-provider";
 
-const DISMISS_KEY = "eat_run_pwa_install_dismissed";
-
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -22,10 +20,12 @@ function isIos() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 }
 
-// 전역 설치 안내 배너. 브라우저 기본 설치는 발견성이 나빠 최소한의 커스텀 안내를 둔다(ADR-0006).
-// 지원 브라우저는 beforeinstallprompt로 네이티브 설치, iOS는 수동 안내. 닫으면 기억, 설치됨이면 숨김.
+// 전역 설치 안내 배너(ADR-0006). 지원 브라우저는 beforeinstallprompt로 네이티브 설치,
+// iOS는 수동 안내. 닫기(✕)는 이번 화면에서만 숨김 — 설치 전이면 다음 방문에 다시 노출한다.
+// 설치된 동안엔 브라우저가 beforeinstallprompt를 보내지 않아 자연히 숨겨지고,
+// 앱을 삭제하면 이벤트가 다시 발화해 배너도 되살아난다.
 export function InstallPrompt() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [show, setShow] = useState(false);
   const [iosHint, setIosHint] = useState(false);
@@ -33,24 +33,13 @@ export function InstallPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isStandalone()) return;
-    // "dismissed"(사용자가 ✕)·레거시 "1"은 계속 숨김을 존중.
-    // "installed"는 숨기되 아래 beforeinstallprompt를 계속 듣는다 — 설치된 동안엔
-    // 이 이벤트가 안 오므로, 다시 발화하면 앱이 삭제됐다는 증거 → 배너 부활.
-    const stored = localStorage.getItem(DISMISS_KEY);
-    if (stored === "dismissed" || stored === "1") return;
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
-      if (localStorage.getItem(DISMISS_KEY) === "installed") {
-        localStorage.removeItem(DISMISS_KEY);
-      }
       setDeferred(event as BeforeInstallPromptEvent);
       setShow(true);
     };
-    const onInstalled = () => {
-      setShow(false);
-      localStorage.setItem(DISMISS_KEY, "installed");
-    };
+    const onInstalled = () => setShow(false);
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
@@ -67,21 +56,12 @@ export function InstallPrompt() {
     };
   }, []);
 
-  function dismiss() {
-    setShow(false);
-    localStorage.setItem(DISMISS_KEY, "dismissed");
-  }
-
   async function install() {
     if (!deferred) return;
     await deferred.prompt();
-    const choice = await deferred.userChoice;
+    await deferred.userChoice;
     setShow(false);
     setDeferred(null);
-    // 네이티브 프롬프트를 취소한 경우엔 플래그를 남기지 않아 다음 방문에 다시 노출.
-    if (choice.outcome === "accepted") {
-      localStorage.setItem(DISMISS_KEY, "installed");
-    }
   }
 
   if (!show) return null;
@@ -95,15 +75,20 @@ export function InstallPrompt() {
             {t("앱으로 설치하기", "Install the app")}
           </p>
           <p className="text-xs text-zinc-400">
-            {iosHint
-              ? t(
-                  "공유 버튼을 누르고 '홈 화면에 추가'를 선택하세요.",
-                  "Tap Share, then 'Add to Home Screen'."
-                )
-              : t(
-                  "홈 화면에 추가하면 매일 더 쉽게 돌아올 수 있어요.",
-                  "Add to your home screen to come back more easily."
-                )}
+            {iosHint ? (
+              t(
+                "공유 버튼을 누르고 '홈 화면에 추가'를 선택하세요.",
+                "Tap Share, then 'Add to Home Screen'."
+              )
+            ) : locale === "ko" ? (
+              <>
+                홈 화면에 추가하면 더 쉽게
+                <br />
+                돌아올 수 있어요
+              </>
+            ) : (
+              "Add to your home screen to come back more easily."
+            )}
           </p>
         </div>
         {!iosHint && (
@@ -113,7 +98,7 @@ export function InstallPrompt() {
         )}
         <button
           type="button"
-          onClick={dismiss}
+          onClick={() => setShow(false)}
           aria-label={t("닫기", "Dismiss")}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-200"
         >
