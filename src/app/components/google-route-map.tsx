@@ -17,17 +17,18 @@ const containerStyle = { width: "100%", height: "100%" };
 export function GoogleRouteMap({ center, path, currentPosition, trail }: GoogleRouteMapProps) {
   const { t } = useLocale();
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: apiKey
   });
 
-  if (!apiKey) {
+  // 키 미설정/스크립트 로드 실패 모두 사용자 문구로. (설정 방법은 README — 화면에 env 변수명 노출 금지)
+  if (!apiKey || loadError) {
     return (
       <div className="flex h-full items-center justify-center px-6 text-center text-sm text-zinc-400">
         {t(
-          "`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`를 설정하면 Google 지도 미리보기를 사용할 수 있습니다.",
-          "Set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` to enable Google map preview."
+          "지도를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+          "Failed to load the map. Please try again later."
         )}
       </div>
     );

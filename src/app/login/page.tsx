@@ -115,8 +115,8 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-zinc-100 md:text-3xl">{t("로그인", "Login")}</h1>
         <p className="mt-2 text-sm text-zinc-300">
           {t(
-            "Google 또는 이메일 매직링크로 로그인할 수 있습니다.",
-            "You can sign in with Google or email magic link."
+            "Google로 로그인하거나, 이메일로 받은 로그인 링크를 눌러 시작할 수 있습니다.",
+            "Sign in with Google, or get a login link sent to your email."
           )}
         </p>
 

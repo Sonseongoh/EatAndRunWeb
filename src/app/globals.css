@@ -14,6 +14,9 @@ body {
   background-color: #09090b;
   color: #f4f4f5;
   font-family: "Pretendard", "Outfit", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* 한국어 단어 중간 줄바꿈 방지("완수/율" 같은 꺾임). 넘치게 긴 토큰(URL 등)만 강제 개행. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .noise-layer {

@@ -71,8 +71,12 @@ export function Step2Activity() {
               <span className="inline-block whitespace-nowrap font-semibold">{targetBurnKcal} kcal</span>
             </p>
             <p className="text-xs text-zinc-400">
-              ({t("섭취", "Intake")} <span className="whitespace-nowrap">{analysis.kcalAvg} kcal</span>{" "}
-              {t("의", "")} {burnRatioPercent}%)
+              (
+              {t(
+                `섭취 ${analysis.kcalAvg} kcal의 ${burnRatioPercent}%`,
+                `${burnRatioPercent}% of ${analysis.kcalAvg} kcal intake`
+              )}
+              )
             </p>
           </div>
           <div className="mt-3 flex items-center gap-3">

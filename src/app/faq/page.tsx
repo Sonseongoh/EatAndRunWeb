@@ -31,9 +31,9 @@ const faqItems = [
     questionKo: "회원가입 없이도 사용할 수 있나요?",
     questionEn: "Can I use it without signing up?",
     answerKo:
-      "홈페이지와 공개 안내 페이지는 누구나 볼 수 있지만, 개인 분석 결과 저장과 히스토리 기능은 로그인 후 이용하는 구조입니다.",
+      "네. 음식 칼로리 분석부터 운동 방식 선택, 러닝 경로 추천까지는 로그인 없이 바로 사용할 수 있습니다. 결과를 저장하고 완수 기록·연속 기록으로 이어가는 기능만 로그인이 필요합니다.",
     answerEn:
-      "Anyone can browse the homepage and public guide pages, but personal analysis storage and history features require sign-in."
+      "Yes. Calorie analysis, activity selection, and route recommendation all work without an account. Sign-in is only needed to save results and track completions and streaks."
   },
   {
     questionKo: "Eat & Run이 의료 서비스를 대체하나요?",
