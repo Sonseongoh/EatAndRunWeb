@@ -70,10 +70,12 @@ export function TextAnalyzeForm({ onDirtyChange }: TextAnalyzeFormProps) {
         </p>
       </div>
 
+      {/* 결과가 떠 있는 동안은 결과 카드의 다음 단계 CTA가 프라이머리 — 재분석은 보조로 물러난다.
+          텍스트를 수정하면 결과가 리셋되어 다시 프라이머리로 복귀. */}
       <ActionButton
         onClick={onAnalyze}
         disabled={!foodText.trim() || analyzeMutation.isPending}
-        variant="primary"
+        variant={analyzeMutation.data ? "ghost" : "primary"}
         size="sm"
         icon={
           analyzeMutation.isPending ? (
@@ -84,7 +86,9 @@ export function TextAnalyzeForm({ onDirtyChange }: TextAnalyzeFormProps) {
       >
         {analyzeMutation.isPending
           ? t("분석 중...", "Analyzing...")
-          : t("분석하기", "Analyze text")}
+          : analyzeMutation.data
+            ? t("다시 분석하기", "Re-analyze")
+            : t("분석하기", "Analyze text")}
       </ActionButton>
 
       {analyzeMutation.isError && (

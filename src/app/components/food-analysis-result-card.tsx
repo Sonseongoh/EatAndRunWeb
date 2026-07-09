@@ -26,13 +26,14 @@ export function FoodAnalysisResultCard({ analysis }: FoodAnalysisResultCardProps
       <p>
         {t("평균 칼로리", "Average calories")}: {calcAverageKcal(analysis.kcalMin, analysis.kcalMax)} kcal
       </p>
+      {/* 분석(측정) → 운동 계획(행동)으로 넘어가는 핵심 CTA — 이 상태의 유일한 프라이머리. */}
       <ActionButton
         onClick={() => router.push("/activity")}
-        variant="ghost"
-        size="xs"
-        className="mx-auto mt-3 block"
+        variant="primary"
+        size="sm"
+        className="mx-auto mt-4 block"
       >
-        {t("다음 화면으로", "Continue")}
+        {t("이 칼로리로 운동 계획 만들기 →", "Create workout plan →")}
       </ActionButton>
     </div>
   );
