@@ -109,17 +109,17 @@ export function LandingPage() {
                 {t("Eat & Run 루틴 자동화", "Eat & Run Routine Automation")}
               </p>
               <h1 className="mt-6 break-keep text-4xl font-bold leading-tight tracking-tight text-white md:text-6xl">
-                {t("먹은 만큼,", "Based on what you ate,")}
+                {t("먹은 만큼,", "From what you ate")}
                 <br />
-                {t("가장 실행하기 쉬운 ", "to the easiest actionable ")}<span className="whitespace-nowrap">{t("러닝으로", "run")}</span>
+                {t("가장 실행하기 쉬운 ", "to a run you'll ")}<span className="whitespace-nowrap">{t("러닝으로", "actually do —")}</span>
                 <span className="block bg-gradient-to-r from-emerald-300 to-amber-300 bg-clip-text text-transparent">
-                  {t("오늘 바로 연결합니다", "we connect it today")}
+                  {t("오늘 바로 연결합니다", "connected today")}
                 </span>
               </h1>
               <p className="mt-6 max-w-[65ch] break-keep text-base leading-relaxed text-zinc-300 md:text-lg">
                 {t(
                   "음식 사진 업로드부터 칼로리 분석, 운동 강도 설정, 지도 기반 러닝 경로 추천까지 한 번에 이어지는 실행형 건강 루틴 서비스입니다.",
-                  "From meal photo upload to calorie analysis, intensity setting, and map route recommendation, everything is connected in one practical health routine flow."
+                  "Snap your meal photo and get the calories, a workout intensity, and a runnable route on the map — one connected flow from eating to running."
                 )}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-4">

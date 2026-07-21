@@ -92,6 +92,7 @@ export function Step2Activity() {
             />
             <input
               type="number"
+              inputMode="numeric"
               min={10}
               max={80}
               step={5}
@@ -110,6 +111,7 @@ export function Step2Activity() {
         <label className="block text-sm font-medium text-zinc-200">{t("몸무게(kg)", "Weight (kg)")}</label>
         <input
           type="number"
+          inputMode="decimal"
           min={35}
           max={150}
           value={weightInput}
